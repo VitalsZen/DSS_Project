@@ -7,34 +7,43 @@ from contextlib import asynccontextmanager
 from typing import List, Optional
 from datetime import datetime
 
-# --- CHANGE: Import Header để lấy session-id ---
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 
 from core_logic import analyze_cv_logic
 from database import create_db_and_tables, get_session
-from models import JobDescription, Application  # models.py đã có field session_id
+from models import JobDescription, Application
 
 TEMP_DIR = "temp_uploads"
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
+    # Cố gắng tạo bảng, nếu lỗi DB thì vẫn cho Server chạy để không bị Render kill
+    try:
+        create_db_and_tables()
+        print("✅ Database connected and tables created.")
+    except Exception as e:
+        print(f"⚠️ Database connection warning: {e}")
     yield
 
 app = FastAPI(title="JobMatchr API", version="2.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Khi deploy production nên đổi thành domain cụ thể của frontend
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- NEW: Dependency để lấy User Session ID từ Header ---
+# --- QUAN TRỌNG: Thêm Endpoint gốc để Render Health Check ---
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "CareerFlow Backend is running!"}
+# ------------------------------------------------------------
+
 async def get_session_id(x_session_id: str = Header(...)):
     if not x_session_id:
         raise HTTPException(status_code=400, detail="Missing Session ID Header")
