@@ -1,22 +1,17 @@
-// ...existing code...
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { Icon } from "../components/Icon";
 import { useJdContext } from "../context/JdContext";
-// Import Context Application để dùng hàm chạy ngầm
 import { useApplicationContext } from "../context/ApplicationContext"; 
 
 export const JobManagement = () => {
   const navigate = useNavigate();
   const { jds } = useJdContext();
   
-  // Lấy hàm chạy ngầm và trạng thái từ Context
   const { runBackgroundAnalysis, isAnalyzing, t } = useApplicationContext();
   
   const fileInputRef = useRef(null);
-  
-  // State for inputs
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedJdId, setSelectedJdId] = useState("");
   const [jdText, setJdText] = useState("");
@@ -48,14 +43,13 @@ export const JobManagement = () => {
     setJdText("");
   };
 
-  // --- HÀM XỬ LÝ CHÍNH (ĐÃ SỬA ĐỔI) ---
   const handleRunAnalysis = async () => {
     if (!selectedFile) {
-      setError("Please upload a PDF CV first.");
+      setError(t('analyze.error_upload'));
       return;
     }
     if (!jdText && !selectedJdId) {
-      setError("Please enter or select a Job Description.");
+      setError(t('analyze.error_jd'));
       return;
     }
 
@@ -63,12 +57,8 @@ export const JobManagement = () => {
 
     try {
       console.log("Starting background analysis...");
-      // Gọi hàm chạy ngầm (Kết quả sẽ tự lưu vào Context)
       await runBackgroundAnalysis(selectedFile, jdText, selectedJdId);
-
-      // Chuyển hướng sang trang kết quả (Không cần gửi state nữa)
       navigate('/compare');
-
     } catch (err) {
       console.error(err);
       setError(err.message || "Analysis failed.");
@@ -77,11 +67,8 @@ export const JobManagement = () => {
 
   return (
     <Layout title={t('analyze.title')}>
-      {/* Loading Overlay đã bị xóa để không chặn UI */}
-      
       <div className="max-w-4xl mx-auto w-full py-6">
         
-        {/* Header Section */}
         <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4 text-primary">
                 <Icon name="search_check" className="text-3xl" />
@@ -92,10 +79,8 @@ export const JobManagement = () => {
             </p>
         </div>
 
-        {/* Main Process Card */}
         <div className="bg-card-light dark:bg-card-dark rounded-2xl border border-border-light dark:border-border-dark shadow-xl shadow-slate-200/50 dark:shadow-none p-1">
             
-            {/* Toolbar / CV Selection */}
             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-t-xl border-b border-border-light dark:border-border-dark flex flex-col sm:flex-row items-center justify-between gap-4">
                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="size-10 rounded-lg bg-white dark:bg-card-dark border border-border-light dark:border-border-dark flex items-center justify-center text-red-500 shadow-sm shrink-0">
@@ -127,14 +112,12 @@ export const JobManagement = () => {
                  </div>
             </div>
 
-            {/* Input Area */}
             <div className="p-6 md:p-8">
                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
                     <Icon name="description" className="text-primary" />
                     {t('analyze.jd_source')}
                  </label>
 
-                 {/* JD Selection Controls */}
                  <div className="flex items-center gap-2 mb-4">
                     <div className="relative flex-1">
                         <select 
@@ -167,7 +150,6 @@ export const JobManagement = () => {
                     )}
                  </div>
 
-                 {/* Text Area */}
                  <div className="relative group">
                     <div className={`absolute inset-0 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl pointer-events-none transition-opacity duration-200 ${selectedJdId ? 'opacity-100' : 'opacity-0'}`} />
                     <textarea 
@@ -184,7 +166,6 @@ export const JobManagement = () => {
                     )}
                  </div>
                  
-                 {/* Error Message */}
                  {error && (
                    <div className="mt-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-bold rounded-lg flex items-center gap-2">
                       <Icon name="error" /> {error}
@@ -192,11 +173,9 @@ export const JobManagement = () => {
                  )}
             </div>
             
-            {/* Action Bar */}
             <div className="p-6 border-t border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/30 rounded-b-xl flex flex-col sm:flex-row items-center justify-center gap-4">
                  <button 
                     onClick={handleRunAnalysis}
-                    // Disable nút khi đang chạy background để tránh spam click
                     disabled={!selectedFile || (!jdText && !selectedJdId) || isAnalyzing}
                     className={`w-full sm:w-auto px-10 py-4 text-lg font-bold rounded-xl shadow-lg transition-all transform flex items-center justify-center gap-3 ${
                         (!selectedFile || (!jdText && !selectedJdId) || isAnalyzing)
