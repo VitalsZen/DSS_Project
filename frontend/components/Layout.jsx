@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Icon } from "./Icon";
@@ -14,7 +13,6 @@ export const Layout = ({ children, title }) => {
     isAnalyzing, 
     analysisSuccess, 
     lastAnalysisResult,
-    // Lấy state notification từ context
     notifications,
     unreadCount,
     markAllAsRead,
@@ -24,7 +22,6 @@ export const Layout = ({ children, title }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef(null);
 
-  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
@@ -38,7 +35,7 @@ export const Layout = ({ children, title }) => {
   const handleToggleNotifications = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications && unreadCount > 0) {
-        markAllAsRead(); // Bấm vào là coi như đã đọc
+        markAllAsRead();
     }
   };
 
@@ -149,7 +146,6 @@ export const Layout = ({ children, title }) => {
                     className="flex cursor-pointer items-center justify-center rounded-full size-10 text-slate-600 hover:bg-slate-100 transition-colors relative"
                 >
                     <Icon name="notifications" className="text-2xl" />
-                    {/* Badge đỏ hiện số lượng chưa đọc */}
                     {unreadCount > 0 && (
                         <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white dark:border-card-dark animate-pulse">
                             {unreadCount > 9 ? '9+' : unreadCount}
@@ -157,19 +153,20 @@ export const Layout = ({ children, title }) => {
                     )}
                 </button>
 
-                {/* Dropdown Menu */}
                 {showNotifications && (
                     <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-card-dark rounded-xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
                         <div className="px-4 py-3 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
-                            <h3 className="font-bold text-sm text-slate-800 dark:text-white">Notifications</h3>
-                            {unreadCount > 0 && <span className="text-xs text-primary font-semibold">{unreadCount} new</span>}
+                            {/* DỊCH: Notifications */}
+                            <h3 className="font-bold text-sm text-slate-800 dark:text-white">{t('notif.title')}</h3>
+                            {/* DỊCH: new */}
+                            {unreadCount > 0 && <span className="text-xs text-primary font-semibold">{unreadCount} {t('notif.new_badge')}</span>}
                         </div>
                         
-                        {/* SỬA: overflow-y-auto (dọc) và overflow-x-hidden (bỏ ngang) */}
                         <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
                             {notifications.length === 0 ? (
                                 <div className="p-8 text-center text-slate-400 text-sm italic">
-                                    No notifications yet.
+                                    {/* DỊCH: No notifications yet */}
+                                    {t('notif.empty')}
                                 </div>
                             ) : (
                                 notifications.map((notif) => (
@@ -187,14 +184,11 @@ export const Layout = ({ children, title }) => {
 
                                         <div className="flex items-start gap-3 pr-4">
                                             <div className="mt-1.5 size-2 rounded-full bg-blue-500 shrink-0"></div>
-                                            <div className="flex-1 min-w-0"> {/* min-w-0 giúp text wrap đúng */}
+                                            <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{notif.title}</p>
-                                                
-                                                {/* SỬA: whitespace-normal (xuống dòng) và break-words (cắt từ nếu quá dài) */}
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 whitespace-normal break-words leading-relaxed">
                                                     {notif.message}
                                                 </p>
-                                                
                                                 <p className="text-[10px] text-slate-400 mt-2">{notif.timestamp}</p>
                                             </div>
                                         </div>
@@ -221,7 +215,5 @@ export const Layout = ({ children, title }) => {
         </div>
       </main>
     </div>
-
-    
   );
 };
