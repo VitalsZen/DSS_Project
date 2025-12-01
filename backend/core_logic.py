@@ -9,11 +9,11 @@ from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 load_dotenv()
 
@@ -120,16 +120,16 @@ def get_llm():
         )
     return _llm_instance
 
+
+
+
+# 2. Sửa hàm get_embeddings
 def get_embeddings():
-    global _embedding_instance
-    if _embedding_instance is None:
-        # Chỉ tải model khi được gọi lần đầu
-        _embedding_instance = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
-        )
-    return _embedding_instance
+    # Sử dụng Google Embeddings thay vì HuggingFace để không tốn RAM server
+    return GoogleGenerativeAIEmbeddings(
+        model="models/embedding-001", 
+        google_api_key=os.getenv("GOOGLE_API_KEY")
+    )
 
 def analyze_cv_logic(file_path: str, jd_text: str):
     """
