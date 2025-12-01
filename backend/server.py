@@ -20,13 +20,20 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Cố gắng tạo bảng, nếu lỗi DB thì vẫn cho Server chạy để không bị Render kill
+    print("🚀 KICKSTART: Server is starting...")
+    
+    # --- THỬ KẾT NỐI DB NHƯNG KHÔNG ĐỂ NÓ CHẶN SERVER ---
     try:
+        print("⏳ Connecting to Database...")
         create_db_and_tables()
-        print("✅ Database connected and tables created.")
+        print("✅ DATABASE: Tables created successfully!")
     except Exception as e:
-        print(f"⚠️ Database connection warning: {e}")
+        # QUAN TRỌNG: In lỗi ra để debug, nhưng KHÔNG throw error để server vẫn lên
+        print(f"❌ DATABASE ERROR (Ignored for startup): {str(e)}")
+        print("⚠️ App will run without DB connection for now.")
+        
     yield
+    print("🛑 Server shutting down...")
 
 app = FastAPI(title="JobMatchr API", version="2.0", lifespan=lifespan)
 
