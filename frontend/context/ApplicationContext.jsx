@@ -123,7 +123,13 @@ const TRANSLATIONS = {
     'compare.save_modal_title': 'Save to Pipeline',
     'compare.confirm_save': 'Confirm & Save',
     'compare.no_analysis_title': 'No Analysis Data',
-    'compare.no_analysis_description': 'Go to "Analyze New Job" to run your first analysis.'
+    'compare.no_analysis_description': 'Go to "Analyze New Job" to run your first analysis.',
+
+    // Notifications
+    'notif.title': 'Notifications', 
+    'notif.empty': 'No notifications yet.', 
+    'notif.new_badge': 'new',
+    'notif.analysis_success_title': 'Analysis Complete'
   },
   vi: {
     // Sidebar
@@ -246,7 +252,13 @@ const TRANSLATIONS = {
     'compare.save_modal_title': 'Lưu vào danh sách theo dõi',
     'compare.confirm_save': 'Xác nhận lưu',
     'compare.no_analysis_title': 'Chưa có dữ liệu phân tích',
-    'compare.no_analysis_description': 'Vui lòng truy cập tab "Phân tích mới" để thực hiện kiểm tra.'
+    'compare.no_analysis_description': 'Vui lòng truy cập tab "Phân tích mới" để thực hiện kiểm tra.',
+
+    // Notifications
+    'notif.title': 'Thông báo', 
+    'notif.empty': 'Chưa có thông báo nào.', 
+    'notif.new_badge': 'mới',
+    'notif.analysis_success_title': 'Phân tích hoàn tất'
   }
 };
 
