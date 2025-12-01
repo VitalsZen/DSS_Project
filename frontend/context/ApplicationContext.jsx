@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// --- TỪ ĐIỂN ĐA NGÔN NGỮ (CẢI TIẾN) ---
 const TRANSLATIONS = {
   en: {
     // Sidebar
@@ -7,201 +8,245 @@ const TRANSLATIONS = {
     'sidebar.pipeline': 'My Applications',
     'sidebar.library': 'JD Library',
     'sidebar.analyze': 'Analyze New Job',
-    'sidebar.compare': 'Fit Gap Analysis',
+    'sidebar.compare': 'Analysis Result',
     'sidebar.stats': 'Stats & Insights',
-    'sidebar.track': 'Track a New Job',
     'sidebar.analyze_now': 'Analyze Now',
-    
-    // Dashboard (Tab 1)
-    'dashboard.analyses': 'Total Analyses Run',
-    'dashboard.applications': 'Total Applications',
+
+    // Dashboard
+    'dashboard.analyses': 'Total Analyses',
+    'dashboard.applications': 'Saved Applications',
     'dashboard.saved_jds': 'Saved JDs',
-    'dashboard.perfect_matches': 'Perfect Matches',
-    'dashboard.activity': 'Analysis Activity',
-    'dashboard.activity_sub': 'Applications created over the last 30 days',
+    'dashboard.perfect_matches': 'High Match (>90%)',
+    'dashboard.activity': 'Activity Log',
+    'dashboard.activity_sub': 'History over the last 30 days',
     'dashboard.recent': 'Recent Applications',
     'dashboard.view_all': 'View All',
     'dashboard.no_apps': 'No applications found. Start by analyzing a new job!',
     'dashboard.table.company': 'Company',
-    'dashboard.table.role': 'Role',
-    'dashboard.table.date': 'Date Analyzed',
+    'dashboard.table.role': 'Position',
+    'dashboard.table.date': 'Date',
     'dashboard.table.status': 'Status',
-    'dashboard.table.score': 'Match Score',
-    
-    // My Applications (Tab 2)
-    'pipeline.search_placeholder': 'Search by Job Name...',
+    'dashboard.table.score': 'Match %',
+
+    // Pipeline
+    'pipeline.search_placeholder': 'Search by Job or Company...',
     'pipeline.status_all': 'All Status',
-    'pipeline.new_btn': 'New',
-    'pipeline.table_header_job': 'Job Name',
+    'pipeline.new_btn': 'New Analysis',
+    'pipeline.table_header_job': 'Job Position',
     'pipeline.table_header_actions': 'Actions',
-    'pipeline.no_data': 'No applications found matching your filters.',
+    'pipeline.no_data': 'No records found matching your filters.',
     'pipeline.records': 'records',
+    'pipeline.data_corrupted': 'Data unavailable.',
+    'pipeline.source_text': 'Source Content',
     
-    // JD Library (Tab 6)
-    'library.title': 'Saved Job Descriptions',
-    'library.subtitle': 'Manage your repository of JDs for quick analysis.',
+    // Status Labels
+    'status.Wishlist': 'Wishlist',
+    'status.Applied': 'Applied',
+    'status.Interviewing': 'Interviewing',
+    'status.Offer Received': 'Offer Received',
+    'status.Rejected': 'Rejected',
+
+    // Notifications (New)
+    'notif.analysis_success_title': 'Analysis Complete',
+    'notif.analysis_failed_title': 'Analysis Failed',
+    'notif.app_saved_title': 'Application Saved',
+    'notif.app_saved_msg': 'Successfully added to your pipeline.',
+    'notif.generic_error': 'An error occurred.',
+
+    // Delete Modal
+    'modal.delete_title': 'Delete Record?',
+    'modal.delete_confirm': 'Are you sure you want to delete this record?',
+    'modal.delete_warning': 'This action cannot be undone.',
+    'modal.btn_cancel': 'Cancel',
+    'modal.btn_confirm': 'Delete',
+
+    // JD Library
+    'library.title': 'Job Description Library',
+    'library.subtitle': 'Manage your saved JDs for quick reuse.',
     'library.add_btn': 'Add New JD',
     'library.table_job': 'Job Title',
     'library.table_company': 'Company',
-    'library.table_added': 'Added',
+    'library.table_added': 'Date Added',
     'library.table_updated': 'Last Updated',
     'library.drawer_create': 'Create New JD',
-    'library.drawer_edit': 'Edit Job Description',
-    'library.drawer_view': 'Job Details',
+    'library.drawer_edit': 'Edit JD',
+    'library.drawer_view': 'JD Details',
+    'library.readonly_view': 'Read-only Mode',
+    'library.fill_details': 'Enter JD details below',
     'library.form_title': 'Job Title',
     'library.form_company': 'Company Name',
-    'library.form_content': 'JD Content',
+    'library.form_content': 'Job Description Content',
     'library.btn_cancel': 'Cancel',
-    'library.btn_create': 'Create JD',
+    'library.btn_create': 'Create',
     'library.btn_save': 'Save Changes',
-    
-    // Analyze New Job (Tab 3)
-    'analyze.title': 'Check Your Fit Instantly',
-    'analyze.subtitle': 'Paste a job description or select a saved one to compare against your CV.',
-    'analyze.active_cv': 'Active CV',
-    'analyze.no_file': 'No file selected',
-    'analyze.change_pdf': 'Change PDF',
-    'analyze.import_pdf': 'Import PDF',
-    'analyze.jd_source': 'Job Description (JD) Source',
-    'analyze.select_placeholder': '-- Paste Manual JD or Select Saved --',
-    'analyze.manual_placeholder': 'Paste the full Job Description here...',
-    'analyze.locked': 'Locked (Saved JD)',
-    'analyze.btn_run': 'Run Match Analysis',
-    'analyze.btn_analyzing': 'Analyzing...',
-    
-    // Fit Gap Analysis (Tab 4/5)
-    'compare.save_btn': 'Save Analysis',
-    'compare.view_jd_btn': 'View JD',
-    'compare.original_jd': 'Original Job Description',
-    'compare.save_modal_title': 'Save to Applications',
-    'compare.confirm_save': 'Confirm Save',
-    'compare.no_analysis_title': 'No Analyses Yet',
-    'compare.no_analysis_description': 'Please go to the "Analyze New Job" tab and run an analysis to see results here.',
+    'library.btn_edit': 'Edit',
+    'library.btn_delete': 'Delete',
+    'library.no_jds': 'No JDs found. Add one to get started!',
+    'library.validation_error': 'Title and Content are required.',
 
-    // --- RESULT & PROFILE ---
-    'candidate_pipelin.page_title': 'Match Analysis candidate_pipelins',
-    'candidate_pipelin.pdf_viewer': 'PDF Resume Viewer',
-    'candidate_pipelin.download_pdf': 'Download Original PDF',
-    'candidate_pipelin.match_score_title': 'Matching Score',
-    'candidate_pipelin.match_label': 'Match',
-    'candidate_pipelin.score_explanation': 'Based on JD requirements',
-    'candidate_pipelin.must_have': 'Must Have:',
-    'candidate_pipelin.nice_to_have': 'Nice to Have:',
-    'candidate_pipelin.keywords_title': 'Matched Keywords',
-    'candidate_pipelin.radar_title': 'Skill Assessment',
-    'candidate_pipelin.gen_assessment': 'General Assessment',
-    'candidate_pipelin.fit_gap_title': 'Fit Gap Analysis', 
-    'candidate_pipelin.table_req': 'Job Requirement (JD)',
-    'candidate_pipelin.table_evidence': 'Evidence in CV',
-    'candidate_pipelin.table_status': 'Status',
-    'candidate_pipelin.status_matched': 'Matched',
-    'candidate_pipelin.status_missing': 'Missing',
-    'candidate_pipelin.strengths': 'Strengths',
-    'candidate_pipelin.weaknesses': 'Weaknesses / Missing Skills',
-    'candidate_pipelin.interview_q': 'Recommended Interview Questions',
-    'candidate_pipelin.btn_print': 'Print Report',
-    'candidate_pipelin.btn_send': 'Send Interview Request',
+    // Analyze New Job
+    'analyze.title': 'Instant Fit Check',
+    'analyze.subtitle': 'Compare your CV against any Job Description instantly.',
+    'analyze.active_cv': 'Active Resume',
+    'analyze.no_file': 'No PDF selected',
+    'analyze.change_pdf': 'Change PDF',
+    'analyze.import_pdf': 'Upload PDF',
+    'analyze.jd_source': 'Job Description Source',
+    'analyze.select_placeholder': '-- Paste text or Select saved JD --',
+    'analyze.manual_placeholder': 'Paste the full Job Description text here...',
+    'analyze.locked': 'Locked (Using Saved JD)',
+    'analyze.btn_run': 'Run Analysis',
+    'analyze.btn_analyzing': 'Analyzing...',
+    'analyze.error_upload': 'Please upload your CV (PDF) first.',
+    'analyze.error_jd': 'Please provide a Job Description.',
+
+    // Result View
+    'result.overall_score': 'Overall Match Score',
+    'result.confidence': 'AI Confidence',
+    'result.must_have': 'Must Have',
+    'result.nice_to_have': 'Nice to Have',
+    'result.radar_chart': 'Competency Radar',
+    'result.matched_keywords': 'Matched Keywords',
+    'result.ai_assessment': 'AI Executive Summary',
+    'result.detailed_comparison': 'Detailed Comparison',
+    'result.table.req': 'Job Requirement',
+    'result.table.ev': 'Your Evidence',
+    'result.table.status': 'Status',
+    'result.strengths': 'Key Strengths',
+    'result.weaknesses': 'Missing Skills / Gaps',
+    'result.interview_questions': 'Interview Prep Questions',
+
+    // Compare Page
+    'compare.save_btn': 'Save Result',
+    'compare.view_jd_btn': 'View Original JD',
+    'compare.original_jd': 'Original Job Description',
+    'compare.save_modal_title': 'Save to Pipeline',
+    'compare.confirm_save': 'Confirm & Save',
+    'compare.no_analysis_title': 'No Analysis Data',
+    'compare.no_analysis_description': 'Go to "Analyze New Job" to run your first analysis.'
   },
   vi: {
     // Sidebar
     'sidebar.dashboard': 'Tổng Quan',
-    'sidebar.pipeline': 'Đơn Ứng Tuyển',
-    'sidebar.library': 'Thư Viện JD',
+    'sidebar.pipeline': 'Danh Sách Hồ Sơ',
+    'sidebar.library': 'Kho JD',
     'sidebar.analyze': 'Phân Tích Mới',
-    'sidebar.compare': 'Kết Quả Phân Tích',
-    'sidebar.stats': 'Thống kê & Chi tiết',
-    'sidebar.track': 'Theo dõi việc mới',
+    'sidebar.compare': 'Kết Quả Chi Tiết',
+    'sidebar.stats': 'Báo Cáo',
     'sidebar.analyze_now': 'Phân tích ngay',
-    
-    // Dashboard (Tab 1)
-    'dashboard.analyses': 'Tổng phân tích',
-    'dashboard.applications': 'Tổng đơn đã lưu',
-    'dashboard.saved_jds': 'JD đã lưu',
-    'dashboard.perfect_matches': 'Khớp tuyệt đối',
-    'dashboard.activity': 'Hoạt động phân tích',
-    'dashboard.activity_sub': 'Đơn tạo trong 30 ngày qua',
-    'dashboard.recent': 'Đơn gần đây',
+
+    // Dashboard
+    'dashboard.analyses': 'Lượt phân tích',
+    'dashboard.applications': 'Hồ sơ đã lưu',
+    'dashboard.saved_jds': 'JD trong kho',
+    'dashboard.perfect_matches': 'Độ khớp cao (>90%)',
+    'dashboard.activity': 'Hoạt động gần đây',
+    'dashboard.activity_sub': 'Thống kê trong 30 ngày qua',
+    'dashboard.recent': 'Hồ sơ mới nhất',
     'dashboard.view_all': 'Xem tất cả',
-    'dashboard.no_apps': 'Chưa có đơn nào. Hãy bắt đầu phân tích công việc mới!',
+    'dashboard.no_apps': 'Chưa có dữ liệu. Hãy thử phân tích công việc đầu tiên!',
     'dashboard.table.company': 'Công ty',
     'dashboard.table.role': 'Vị trí',
-    'dashboard.table.date': 'Ngày phân tích',
+    'dashboard.table.date': 'Ngày tạo',
     'dashboard.table.status': 'Trạng thái',
-    'dashboard.table.score': 'Điểm phù hợp',
-    
-    // My Applications (Tab 2)
-    'pipeline.search_placeholder': 'Tìm theo tên công việc...',
+    'dashboard.table.score': 'Độ phù hợp',
+
+    // Pipeline
+    'pipeline.search_placeholder': 'Tìm theo Vị trí hoặc Công ty...',
     'pipeline.status_all': 'Tất cả trạng thái',
-    'pipeline.new_btn': 'Thêm mới',
-    'pipeline.table_header_job': 'Tên công việc',
+    'pipeline.new_btn': 'Thêm phân tích',
+    'pipeline.table_header_job': 'Vị trí ứng tuyển',
     'pipeline.table_header_actions': 'Thao tác',
-    'pipeline.no_data': 'Không tìm thấy đơn nào phù hợp bộ lọc.',
+    'pipeline.no_data': 'Không tìm thấy hồ sơ nào.',
     'pipeline.records': 'bản ghi',
+    'pipeline.data_corrupted': 'Dữ liệu không khả dụng.',
+    'pipeline.source_text': 'Nội dung gốc',
     
-    // JD Library (Tab 6)
-    'library.title': 'Thư viện JD đã lưu',
-    'library.subtitle': 'Quản lý kho JD để phân tích nhanh.',
+    // Status Labels (Dịch theo ngữ cảnh HR)
+    'status.Wishlist': 'Quan tâm',
+    'status.Applied': 'Đã nộp CV',
+    'status.Interviewing': 'Đang phỏng vấn',
+    'status.Offer Received': 'Đã nhận Offer',
+    'status.Rejected': 'Bị từ chối',
+
+    // Notifications (Việt hóa thông báo)
+    'notif.analysis_success_title': 'Phân tích hoàn tất',
+    'notif.analysis_failed_title': 'Phân tích thất bại',
+    'notif.app_saved_title': 'Đã lưu hồ sơ',
+    'notif.app_saved_msg': 'Hồ sơ đã được thêm vào danh sách theo dõi.',
+    'notif.generic_error': 'Đã có lỗi xảy ra.',
+
+    // Delete Modal
+    'modal.delete_title': 'Xóa dữ liệu?',
+    'modal.delete_confirm': 'Bạn có chắc chắn muốn xóa bản ghi này?',
+    'modal.delete_warning': 'Dữ liệu sẽ bị mất vĩnh viễn và không thể khôi phục.',
+    'modal.btn_cancel': 'Hủy bỏ',
+    'modal.btn_confirm': 'Xóa ngay',
+
+    // JD Library
+    'library.title': 'Kho Job Description (JD)',
+    'library.subtitle': 'Lưu trữ các mô tả công việc để tái sử dụng.',
     'library.add_btn': 'Thêm JD Mới',
     'library.table_job': 'Tên công việc',
     'library.table_company': 'Công ty',
     'library.table_added': 'Ngày thêm',
-    'library.table_updated': 'Cập nhật cuối',
+    'library.table_updated': 'Cập nhật',
     'library.drawer_create': 'Tạo JD Mới',
     'library.drawer_edit': 'Chỉnh sửa JD',
-    'library.drawer_view': 'Chi tiết công việc',
+    'library.drawer_view': 'Chi tiết JD',
+    'library.readonly_view': 'Chế độ xem',
+    'library.fill_details': 'Nhập thông tin bên dưới',
     'library.form_title': 'Tên công việc',
     'library.form_company': 'Tên công ty',
-    'library.form_content': 'Nội dung JD',
+    'library.form_content': 'Nội dung mô tả (JD)',
     'library.btn_cancel': 'Hủy',
-    'library.btn_create': 'Tạo JD',
+    'library.btn_create': 'Tạo mới',
     'library.btn_save': 'Lưu thay đổi',
-    
-    // Analyze New Job (Tab 3)
-    'analyze.title': 'Kiểm tra độ phù hợp ngay',
-    'analyze.subtitle': 'Dán mô tả công việc hoặc chọn JD đã lưu để so sánh với CV của bạn.',
-    'analyze.active_cv': 'CV hiện tại',
-    'analyze.no_file': 'Chưa chọn file',
-    'analyze.change_pdf': 'Đổi PDF',
-    'analyze.import_pdf': 'Nhập PDF',
-    'analyze.jd_source': 'Nguồn Mô tả công việc (JD)',
-    'analyze.select_placeholder': '-- Dán JD thủ công hoặc Chọn đã lưu --',
-    'analyze.manual_placeholder': 'Dán toàn bộ nội dung JD vào đây...',
-    'analyze.locked': 'Đã khóa (JD đã lưu)',
-    'analyze.btn_run': 'Chạy phân tích',
-    'analyze.btn_analyzing': 'Đang phân tích...',
+    'library.btn_edit': 'Sửa',
+    'library.btn_delete': 'Xóa',
+    'library.no_jds': 'Danh sách trống. Hãy thêm JD đầu tiên!',
+    'library.validation_error': 'Vui lòng nhập Tiêu đề và Nội dung.',
 
-    // --- candidate_pipelin & PROFILE (MỚI THÊM - VIỆT HÓA) ---
-    'candidate_pipelin.page_title': 'Kết Quả Phân Tích',
-    'candidate_pipelin.pdf_viewer': 'Xem PDF CV',
-    'candidate_pipelin.download_pdf': 'Tải PDF gốc',
-    'candidate_pipelin.match_score_title': 'Điểm Phù Hợp',
-    'candidate_pipelin.match_label': 'Khớp',
-    'candidate_pipelin.score_explanation': 'Dựa trên các yêu cầu của JD',
-    'candidate_pipelin.must_have': 'Bắt buộc:',
-    'candidate_pipelin.nice_to_have': 'Ưu tiên:',
-    'candidate_pipelin.keywords_title': 'Từ khóa phù hợp',
-    'candidate_pipelin.radar_title': 'Đánh giá kỹ năng',
-    'candidate_pipelin.gen_assessment': 'Đánh giá chung',
-    'candidate_pipelin.fit_gap_title': 'Phân tích chi tiết',
-    'candidate_pipelin.table_req': 'Yêu cầu công việc (JD)',
-    'candidate_pipelin.table_evidence': 'Bằng chứng trong CV',
-    'candidate_pipelin.table_status': 'Trạng thái',
-    'candidate_pipelin.status_matched': 'Đạt',
-    'candidate_pipelin.status_missing': 'Thiếu',
-    'candidate_pipelin.strengths': 'Điểm mạnh',
-    'candidate_pipelin.weaknesses': 'Điểm yếu / Kỹ năng thiếu',
-    'candidate_pipelin.interview_q': 'Câu hỏi phỏng vấn đề xuất',
-    'candidate_pipelin.btn_print': 'In Báo Cáo',
-    'candidate_pipelin.btn_send': 'Gửi Email',
-    
-    // Fit Gap Analysis (Tab 4/5)
+    // Analyze New Job
+    'analyze.title': 'Kiểm tra độ phù hợp',
+    'analyze.subtitle': 'So sánh CV của bạn với bất kỳ mô tả công việc nào chỉ trong vài giây.',
+    'analyze.active_cv': 'CV Đang dùng',
+    'analyze.no_file': 'Chưa chọn PDF',
+    'analyze.change_pdf': 'Đổi CV',
+    'analyze.import_pdf': 'Tải lên CV',
+    'analyze.jd_source': 'Nguồn dữ liệu JD',
+    'analyze.select_placeholder': '-- Dán văn bản hoặc Chọn từ kho --',
+    'analyze.manual_placeholder': 'Copy và dán toàn bộ nội dung tuyển dụng vào đây...',
+    'analyze.locked': 'Đã khóa (JD từ kho)',
+    'analyze.btn_run': 'Bắt đầu phân tích',
+    'analyze.btn_analyzing': 'AI đang đọc...',
+    'analyze.error_upload': 'Vui lòng tải lên CV (định dạng PDF).',
+    'analyze.error_jd': 'Vui lòng nhập hoặc chọn một mô tả công việc.',
+
+    // Result View
+    'result.overall_score': 'Điểm phù hợp',
+    'result.confidence': 'Độ tin cậy',
+    'result.must_have': 'Yêu cầu Bắt buộc',
+    'result.nice_to_have': 'Điểm cộng (Ưu tiên)',
+    'result.radar_chart': 'Biểu đồ năng lực',
+    'result.matched_keywords': 'Từ khóa khớp',
+    'result.ai_assessment': 'Nhận xét tổng quan từ AI',
+    'result.detailed_comparison': 'So sánh chi tiết từng mục',
+    'result.table.req': 'Yêu cầu của nhà tuyển dụng',
+    'result.table.ev': 'Năng lực trong CV của bạn',
+    'result.table.status': 'Kết quả',
+    'result.strengths': 'Điểm mạnh nổi bật',
+    'result.weaknesses': 'Điểm yếu & Kỹ năng thiếu',
+    'result.interview_questions': 'Gợi ý câu hỏi phỏng vấn',
+
+    // Compare Page
     'compare.save_btn': 'Lưu kết quả',
-    'compare.view_jd_btn': 'Xem JD',
-    'compare.original_jd': 'Mô tả công việc gốc',
-    'compare.save_modal_title': 'Lưu vào danh sách',
+    'compare.view_jd_btn': 'Xem JD gốc',
+    'compare.original_jd': 'Nội dung JD gốc',
+    'compare.save_modal_title': 'Lưu vào danh sách theo dõi',
     'compare.confirm_save': 'Xác nhận lưu',
-    'compare.no_analysis_title': 'Chưa có phân tích nào',
-    'compare.no_analysis_description': 'Vui lòng vào tab "Phân tích mới" và chạy phân tích để xem kết quả tại đây.'
+    'compare.no_analysis_title': 'Chưa có dữ liệu phân tích',
+    'compare.no_analysis_description': 'Vui lòng truy cập tab "Phân tích mới" để thực hiện kiểm tra.'
   }
 };
 
@@ -210,11 +255,10 @@ const ApplicationContext = createContext(undefined);
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || 'http://127.0.0.1:8000';
 const API_URL = `${API_BASE}/api/applications`;
 
-// --- NEW: Helper function để lấy hoặc tạo Session ID ---
 const getSessionId = () => {
     let id = localStorage.getItem('careerflow_session_id');
     if (!id) {
-        id = crypto.randomUUID(); // Sinh ID ngẫu nhiên
+        id = crypto.randomUUID(); 
         localStorage.setItem('careerflow_session_id', id);
     }
     return id;
@@ -259,23 +303,19 @@ export const ApplicationProvider = ({ children }) => {
 
   const fetchApplications = async () => {
     try {
-      // --- CHANGE: Thêm Header ---
       const res = await fetch(API_URL, {
-          headers: {
-              'x-session-id': getSessionId()
-          }
+          headers: { 'x-session-id': getSessionId() }
       });
       if (!res.ok) throw new Error('Failed to fetch applications');
       const data = await res.json();
       const mapped = Array.isArray(data) ? data.map(mapApp) : [];
       setApplications(mapped);
-      setTotalAnalyses(mapped.length + 120); // Fake base number
+      setTotalAnalyses(mapped.length + 120); 
     } catch (err) {
       console.error('fetchApplications error:', err);
     }
   };
 
-  // ... (Các hàm notification giữ nguyên) ...
   const addNotification = (title, message) => {
     const newNotif = {
         id: Date.now(),
@@ -311,12 +351,9 @@ export const ApplicationProvider = ({ children }) => {
         formData.append("jd_text", jdText);
       }
 
-      // --- CHANGE: Thêm Header (lưu ý không set Content-Type với FormData) ---
       const response = await fetch(`${API_BASE}/api/analyze`, {
         method: "POST",
-        headers: {
-            'x-session-id': getSessionId()
-        },
+        headers: { 'x-session-id': getSessionId() },
         body: formData,
       });
 
@@ -339,10 +376,10 @@ export const ApplicationProvider = ({ children }) => {
       setAnalysisSuccess(true);
 
       const cName = result.personal_info?.name || "Unknown";
-      const cPos = result.personal_info?.position || "N/A";
       const cScore = result.matching_score?.percentage || 0;
       
-      addNotification("Analysis Complete", `${cName} • ${cPos} • ${cScore}% Match`);
+      // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO
+      addNotification(t('notif.analysis_success_title'), `${cName} • ${cScore}% Match`);
 
       setTimeout(() => {
         setAnalysisSuccess(false);
@@ -353,8 +390,9 @@ export const ApplicationProvider = ({ children }) => {
     } catch (error) {
       console.error("Background Analysis Failed:", error);
       setIsAnalyzing(false);
-      addNotification("Analysis Failed", error.message || "An error occurred.");
-      alert("Phân tích thất bại: " + error.message);
+      // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO LỖI
+      addNotification(t('notif.analysis_failed_title'), error.message || t('notif.generic_error'));
+      alert(`${t('notif.analysis_failed_title')}: ${error.message}`);
       throw error;
     }
   };
@@ -370,7 +408,6 @@ export const ApplicationProvider = ({ children }) => {
     };
 
     try {
-      // --- CHANGE: Thêm Header ---
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 
@@ -385,7 +422,10 @@ export const ApplicationProvider = ({ children }) => {
         const mapped = mapApp(created);
         setApplications(prev => [mapped, ...prev]);
         incrementAnalysisCount();
-        addNotification("Application Saved", `Saved "${newApp.jobTitle}" to your pipeline.`);
+        
+        // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO
+        addNotification(t('notif.app_saved_title'), t('notif.app_saved_msg'));
+        
         return mapped;
       } else {
         const txt = await res.text();
@@ -403,7 +443,6 @@ export const ApplicationProvider = ({ children }) => {
       if (updates.jobTitle) payload.job_title = updates.jobTitle;
       if (updates.companyName) payload.company_name = updates.companyName;
 
-      // --- CHANGE: Thêm Header ---
       const res = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
         headers: { 
@@ -425,18 +464,11 @@ export const ApplicationProvider = ({ children }) => {
     }
   };
 
-  const moveApplication = async (id, newStatus) => {
-    return updateApplication(id, { status: newStatus });
-  };
-
   const deleteApplication = async (id) => {
     try {
-      // --- CHANGE: Thêm Header ---
       const res = await fetch(`${API_URL}/${id}`, { 
           method: 'DELETE',
-          headers: {
-              'x-session-id': getSessionId()
-          }
+          headers: { 'x-session-id': getSessionId() }
       });
       if (res.ok) {
         setApplications(prev => prev.filter(app => app.id !== String(id)));
@@ -467,18 +499,15 @@ export const ApplicationProvider = ({ children }) => {
       setLanguage,
       t,
       addApplication,
-      moveApplication,
       updateApplication,
       deleteApplication,
       incrementAnalysisCount,
       fetchApplications,
-      
       isAnalyzing,
       analysisSuccess,
       lastAnalysisResult,
       lastJdSource,
       runBackgroundAnalysis,
-
       notifications,
       unreadCount,
       markAllAsRead,
