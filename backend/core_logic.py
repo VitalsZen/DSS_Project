@@ -44,7 +44,10 @@ BƯỚC 1: TRÍCH XUẤT THÔNG TIN CÁ NHÂN
 
 BƯỚC 2: PHÂN TÍCH JD VÀ TÍNH ĐIỂM (QUY TẮC "1 ĐỀU")
 - Tách JD thành các dòng riêng biệt. Tổng số dòng = Tổng yêu cầu (Total_Req).
-- Phân loại từng dòng thành "Bắt buộc" (Requirement) hoặc "Ưu tiên" (Nice-to-have) dựa trên từ khóa (nếu không rõ, mặc định là Bắt buộc).
+- Phân loại từng dòng thành "Bắt buộc" (Requirement) hoặc "Ưu tiên" (Nice-to-have) dựa trên từ khóa:
+  * Tiếng Anh: "nice to have", "plus", "preferred", "advantage", "desired", "bonus", "optional", "willing to".
+  * Tiếng Việt: "ưu tiên", "lợi thế", "điểm cộng", "không bắt buộc", "mong muốn", "nếu có".
+  -> Các trường hợp còn lại mặc định là **"Bắt buộc" (Requirement)**.
 - Đối chiếu CV: Với mỗi dòng JD, nếu CV có bằng chứng đáp ứng => Tính là 1 điểm (Matched).
 - Keyword phát hiện: Trích xuất các từ khóa kỹ thuật (Hard skill) trùng khớp giữa CV và JD.
 - Công thức tính % chung: (Tổng số dòng Matched / Tổng số dòng JD) * 100.
