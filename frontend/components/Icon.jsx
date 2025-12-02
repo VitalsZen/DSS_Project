@@ -1,14 +1,11 @@
-// frontend/components/Icon.jsx
 import React from "react";
 
-// Định nghĩa các tên thay thế (Alias)
 const ICON_MAPPING = {
   "loader": "sync",      // Gõ 'loader' tự chuyển thành 'sync'
   "spinner": "autorenew" // Dự phòng thêm
 };
 
 export const Icon = ({ name, className = "", fill = false }) => {
-  // Lấy tên icon chuẩn từ mapping, nếu không có thì dùng tên gốc
   const finalName = ICON_MAPPING[name] || name;
 
   return (
