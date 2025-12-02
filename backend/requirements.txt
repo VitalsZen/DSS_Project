@@ -13,6 +13,5 @@ python-dotenv>=1.0.1
 requests>=2.32.0
 aiofiles>=23.2.0
 
-# --- THÊM LẠI CÁI NÀY ---
 langchain-huggingface>=0.0.3
 sentence-transformers>=3.0.0
