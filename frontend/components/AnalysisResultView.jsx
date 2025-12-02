@@ -3,19 +3,33 @@ import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarA
 import { Icon } from "./Icon";
 import { useApplicationContext } from "../context/ApplicationContext";
 
+// --- TỪ ĐIỂN DỊCH TRỤC BIỂU ĐỒ ---
+const RADAR_LABELS = {
+    "Hard Skills": "Kỹ năng cứng",
+    "Soft Skills": "Kỹ năng mềm",
+    "Experience": "Kinh nghiệm",
+    "Education": "Học vấn",
+    "Domain Knowledge": "Kiến thức ngành"
+};
+
 export const AnalysisResultView = ({ 
   customTitle, 
   customSubtitle, 
   data 
 }) => {
-  const { language, t } = useApplicationContext(); 
+  const { language, t } = useApplicationContext();
 
   if (!data) return null;
 
+  // Xử lý dữ liệu: Ghép điểm số và lý do vào một mảng
   const radarData = Object.entries(data.radar_chart).map(([subject, score]) => ({
-    subject,
+    originalSubject: subject,
+    // Nếu đang ở chế độ tiếng Việt thì dịch, không thì giữ nguyên
+    subject: language === 'vi' ? (RADAR_LABELS[subject] || subject) : subject,
     score,
     fullMark: 10,
+    // Lấy lý do từ field mới (nếu có)
+    reason: data.radar_reasoning ? data.radar_reasoning[subject] : "No explanation provided."
   }));
 
   const scoreData = [
@@ -25,13 +39,18 @@ export const AnalysisResultView = ({
 
   const getComparisonTable = () => {
     const table = data.bilingual_content.comparison_table;
-    if (Array.isArray(table)) {
-      return table;
-    }
+    if (Array.isArray(table)) { return table; }
     return table[language] || table['en'] || [];
   };
 
   const comparisonTable = getComparisonTable();
+
+  // Helper chọn màu cho điểm số
+  const getScoreColor = (score) => {
+      if (score >= 8) return "bg-green-100 text-green-700 border-green-200";
+      if (score >= 5) return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      return "bg-red-50 text-red-700 border-red-200";
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -45,6 +64,7 @@ export const AnalysisResultView = ({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* LEFT: OVERALL SCORE */}
           <div className="lg:col-span-5 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col items-center justify-center">
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-wide">{t('result.overall_score')}</h3>
                 
@@ -88,24 +108,46 @@ export const AnalysisResultView = ({
                 </div>
           </div>
 
+          {/* RIGHT: RADAR CHART & EXPLANATION */}
           <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col">
               <h3 className="text-base font-bold text-text-light dark:text-text-dark mb-4">{t('result.radar_chart')}</h3>
-              <div className="h-[300px] w-full flex-1">
-                  <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
-                          <PolarGrid stroke="#e2e8f0" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 500 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
-                          <Radar
-                              name="Score"
-                              dataKey="score"
-                              stroke="#137fec"
-                              strokeWidth={3}
-                              fill="#137fec"
-                              fillOpacity={0.2}
-                          />
-                      </RadarChart>
-                  </ResponsiveContainer>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+                  {/* Chart */}
+                  <div className="h-[280px] w-full relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                              <PolarGrid stroke="#e2e8f0" />
+                              <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
+                              <Radar
+                                  name="Score"
+                                  dataKey="score"
+                                  stroke="#137fec"
+                                  strokeWidth={3}
+                                  fill="#137fec"
+                                  fillOpacity={0.2}
+                              />
+                          </RadarChart>
+                      </ResponsiveContainer>
+                  </div>
+
+                  {/* List Explanations (Scrollable) */}
+                  <div className="overflow-y-auto max-h-[280px] pr-2 space-y-3 custom-scrollbar">
+                      {radarData.map((item, index) => (
+                          <div key={index} className={`p-3 rounded-lg border ${getScoreColor(item.score).replace('text-', 'border-').split(' ')[2]} bg-white dark:bg-slate-800/50 shadow-sm`}>
+                              <div className="flex justify-between items-center mb-1.5">
+                                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">{item.subject}</span>
+                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getScoreColor(item.score)}`}>
+                                      {item.score}/10
+                                  </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic border-t border-slate-100 dark:border-slate-700 pt-1.5 mt-1">
+                                  "{item.reason}"
+                              </p>
+                          </div>
+                      ))}
+                  </div>
               </div>
           </div>
       </div>
