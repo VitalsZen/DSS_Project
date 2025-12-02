@@ -46,7 +46,10 @@ const TRANSLATIONS = {
     'status.Offer Received': 'Offer Received',
     'status.Rejected': 'Rejected',
 
-    // Notifications (New)
+    // Notifications
+    'notif.title': 'Notifications',
+    'notif.empty': 'No notifications yet.',
+    'notif.new_badge': 'new',
     'notif.analysis_success_title': 'Analysis Complete',
     'notif.analysis_failed_title': 'Analysis Failed',
     'notif.app_saved_title': 'Application Saved',
@@ -126,13 +129,7 @@ const TRANSLATIONS = {
     'compare.save_modal_title': 'Save to Pipeline',
     'compare.confirm_save': 'Confirm & Save',
     'compare.no_analysis_title': 'No Analysis Data',
-    'compare.no_analysis_description': 'Go to "Analyze New Job" to run your first analysis.',
-
-    // Notifications
-    'notif.title': 'Notifications', 
-    'notif.empty': 'No notifications yet.', 
-    'notif.new_badge': 'new',
-    'notif.analysis_success_title': 'Analysis Complete'
+    'compare.no_analysis_description': 'Go to "Analyze New Job" to run your first analysis.'
   },
   vi: {
     // Sidebar
@@ -171,14 +168,17 @@ const TRANSLATIONS = {
     'pipeline.data_corrupted': 'Dữ liệu không khả dụng.',
     'pipeline.source_text': 'Nội dung gốc',
     
-    // Status Labels (Dịch theo ngữ cảnh HR)
+    // Status Labels
     'status.Wishlist': 'Quan tâm',
     'status.Applied': 'Đã nộp CV',
     'status.Interviewing': 'Đang phỏng vấn',
     'status.Offer Received': 'Đã nhận Offer',
     'status.Rejected': 'Bị từ chối',
 
-    // Notifications (Việt hóa thông báo)
+    // Notifications
+    'notif.title': 'Thông báo',
+    'notif.empty': 'Chưa có thông báo nào.',
+    'notif.new_badge': 'mới',
     'notif.analysis_success_title': 'Phân tích hoàn tất',
     'notif.analysis_failed_title': 'Phân tích thất bại',
     'notif.app_saved_title': 'Đã lưu hồ sơ',
@@ -258,13 +258,7 @@ const TRANSLATIONS = {
     'compare.save_modal_title': 'Lưu vào danh sách theo dõi',
     'compare.confirm_save': 'Xác nhận lưu',
     'compare.no_analysis_title': 'Chưa có dữ liệu phân tích',
-    'compare.no_analysis_description': 'Vui lòng truy cập tab "Phân tích mới" để thực hiện kiểm tra.',
-
-    // Notifications
-    'notif.title': 'Thông báo', 
-    'notif.empty': 'Chưa có thông báo nào.', 
-    'notif.new_badge': 'mới',
-    'notif.analysis_success_title': 'Phân tích hoàn tất'
+    'compare.no_analysis_description': 'Vui lòng truy cập tab "Phân tích mới" để thực hiện kiểm tra.'
   }
 };
 
@@ -309,7 +303,6 @@ export const ApplicationProvider = ({ children }) => {
     let formattedDate = 'N/A';
     if (item.created_at) {
         let utcString = item.created_at;
-        // Nếu chuỗi chưa có chữ Z ở cuối, ta thêm vào
         if (!utcString.endsWith('Z')) {
             utcString += 'Z';
         }
@@ -320,7 +313,7 @@ export const ApplicationProvider = ({ children }) => {
                 year: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false // Dùng định dạng 24h
+                hour12: false
             });
         } catch (e) {
             formattedDate = item.created_at;
@@ -333,7 +326,6 @@ export const ApplicationProvider = ({ children }) => {
       jobTitle: item.job_title || item.jobTitle || '',
       status: item.status || 'new',
       matchScore: item.match_score ?? item.matchScore ?? 0,
-      // Dùng biến đã format ở trên
       dateApplied: formattedDate,
       analysisResult: item.analysis_result || item.analysisResult || null,
       jdContent: item.jd_content || '', 
@@ -418,7 +410,6 @@ export const ApplicationProvider = ({ children }) => {
       const cName = result.personal_info?.name || "Unknown";
       const cScore = result.matching_score?.percentage || 0;
       
-      // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO
       addNotification(t('notif.analysis_success_title'), `${cName} • ${cScore}% Match`);
 
       setTimeout(() => {
@@ -430,7 +421,6 @@ export const ApplicationProvider = ({ children }) => {
     } catch (error) {
       console.error("Background Analysis Failed:", error);
       setIsAnalyzing(false);
-      // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO LỖI
       addNotification(t('notif.analysis_failed_title'), error.message || t('notif.generic_error'));
       alert(`${t('notif.analysis_failed_title')}: ${error.message}`);
       throw error;
@@ -463,7 +453,6 @@ export const ApplicationProvider = ({ children }) => {
         setApplications(prev => [mapped, ...prev]);
         incrementAnalysisCount();
         
-        // SỬ DỤNG t() ĐỂ DỊCH THÔNG BÁO
         addNotification(t('notif.app_saved_title'), t('notif.app_saved_msg'));
         
         return mapped;
