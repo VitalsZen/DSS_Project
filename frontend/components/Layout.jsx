@@ -65,6 +65,7 @@ export const Layout = ({ children, title }) => {
 
   return (
     <div className="flex h-screen w-full bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+      
       {/* Sidebar */}
       <aside className="flex w-64 flex-col border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 shrink-0 z-20">
         <div className="flex flex-col gap-4">
@@ -156,16 +157,17 @@ export const Layout = ({ children, title }) => {
                 {showNotifications && (
                     <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-card-dark rounded-xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
                         <div className="px-4 py-3 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50 dark:bg-slate-900/30">
-                            {/* DỊCH: Notifications */}
+                            
+                          {/* Notifications */}
                             <h3 className="font-bold text-sm text-slate-800 dark:text-white">{t('notif.title')}</h3>
-                            {/* DỊCH: new */}
+  
                             {unreadCount > 0 && <span className="text-xs text-primary font-semibold">{unreadCount} {t('notif.new_badge')}</span>}
                         </div>
                         
                         <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
                             {notifications.length === 0 ? (
                                 <div className="p-8 text-center text-slate-400 text-sm italic">
-                                    {/* DỊCH: No notifications yet */}
+                                    {/* No notifications yet */}
                                     {t('notif.empty')}
                                 </div>
                             ) : (
