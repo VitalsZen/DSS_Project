@@ -124,10 +124,13 @@ The project is configured for automated deployment:
     * Set Environment Variable: `VITE_API_URL` -> Link to your Hugging Face Space (e.g., `https://your-space-name.hf.space`).
     * Vercel will auto-deploy on every push to `main`.
 
-## 8. Contact
+## Contact
+
 For questions or further information, please contact:
-   - Supervisor: MSc. Nguyen Ho Duy Tri – trinhd@uit.edu.vn
-   - Group members: 
-	+ Pham Huynh Tan Khang – 22520624@gm.uit.edu.vn
-	+ Huynh Ngoc Trang – 22521510@gm.uit.edu.vn
+
+- **Supervisor:** MSc. Nguyen Ho Duy Tri – trinhd@uit.edu.vn  
+- **Group members:**  
+  - Pham Huynh Tan Khang – 22520624@gm.uit.edu.vn  
+  - Huynh Ngoc Trang – 22521510@gm.uit.edu.vn
+
 
