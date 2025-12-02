@@ -65,8 +65,9 @@ BƯỚC 4: CHẤM ĐIỂM RADAR (1-10) VÀ GIẢI THÍCH LÝ DO
 Chỉ trả về 1 JSON duy nhất.
 LƯU Ý QUAN TRỌNG:
 1. Không dùng Markdown (```json ... ```). Trả về raw text.
-2. KHÔNG ĐƯỢC có dấu phẩy (,) ở cuối danh sách hoặc object cuối cùng. (NO TRAILING COMMAS).
+2. KHÔNG ĐƯỢC có dấu phẩy (,) ở cuối danh sách hoặc object cuối cùng (NO TRAILING COMMAS).
 3. Đảm bảo cấu trúc ngoặc {} đóng mở chính xác.
+
 Cấu trúc như sau:
 {{
     "personal_info": {{
@@ -137,7 +138,6 @@ def get_llm():
         else:
             print(f"✅ Đã tìm thấy API Key: {api_key[:5]}... (ẩn phần sau)")
             
-        # Quay lại dùng gemini-flash-latest theo ý bạn
         _llm_instance = ChatGoogleGenerativeAI(
             model="gemini-flash-latest", 
             temperature=0.2,
@@ -192,14 +192,18 @@ def analyze_cv_logic(file_path: str, jd_text: str):
         def format_docs(docs):
             return "\n\n".join(d.page_content for d in docs)
 
+        # [FIX] Định nghĩa chain rõ ràng hơn để tránh lỗi "Missing variables"
         chain = (
-            {"cv_text": retriever | format_docs, "jd_text": RunnablePassthrough()}
+            {
+                "cv_text": retriever | format_docs, 
+                "jd_text": RunnablePassthrough() 
+            }
             | prompt
             | llm
             | parser
         )
 
-        print("🤖 Đang phân tích với Gemini Flash Latest...")
+        print("🤖 Đang phân tích với Gemini 1.5 Flash...")
         result = chain.invoke(jd_text)
         
         vectorstore.delete_collection() 
