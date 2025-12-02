@@ -137,9 +137,9 @@ def get_llm():
     if _llm_instance is None:
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            print("❌ LỖI NGHIÊM TRỌNG: Không tìm thấy GOOGLE_API_KEY trong biến môi trường!")
+            print(" LỖI NGHIÊM TRỌNG: Không tìm thấy GOOGLE_API_KEY trong biến môi trường!")
         else:
-            print(f"✅ Đã tìm thấy API Key: {api_key[:5]}... (ẩn phần sau)")
+            print(f" Đã tìm thấy API Key: {api_key[:5]}... (ẩn phần sau)")
             
         # [FIX] Dùng gemini-1.5-flash để ổn định và thông minh hơn
         _llm_instance = ChatGoogleGenerativeAI(
@@ -207,7 +207,7 @@ def analyze_cv_logic(file_path: str, jd_text: str):
             | parser
         )
 
-        print("🤖 Đang phân tích với Gemini 1.5 Flash...")
+        print(" Đang phân tích với Gemini Flash...")
         result = chain.invoke(jd_text)
         
         vectorstore.delete_collection() 
@@ -215,5 +215,5 @@ def analyze_cv_logic(file_path: str, jd_text: str):
 
     except Exception as e:
         # In lỗi chi tiết ra console server để debug
-        print(f"❌ LỖI PHÂN TÍCH: {str(e)}")
+        print(f" LỖI PHÂN TÍCH: {str(e)}")
         return {"error": f"Lỗi phân tích AI: {str(e)}"}
