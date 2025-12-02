@@ -9,7 +9,7 @@ export const CandidatePipeline = () => {
     const navigate = useNavigate(); 
     const { applications, deleteApplication, updateApplication, t } = useApplicationContext();
     
-    // --- STATE ---
+    // State
     const [filterStatus, setFilterStatus] = useState("All"); 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedApp, setSelectedApp] = useState(null);
@@ -20,7 +20,7 @@ export const CandidatePipeline = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteTargetId, setDeleteTargetId] = useState(null);
 
-    // --- FILTER LOGIC ---
+    // Filter logic
     const filteredApps = useMemo(() => {
         let apps = [...applications];
 
@@ -51,7 +51,7 @@ export const CandidatePipeline = () => {
     return apps;
   }, [applications, searchTerm, filterStatus, sortConfig]);
 
-  // --- HELPER FUNCTIONS ---
+  // Helper Function
   const getStatusColor = (status) => {
     return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-medium";
   };
@@ -71,7 +71,7 @@ export const CandidatePipeline = () => {
     setSortConfig({ key, direction });
   };
 
-  // --- ACTION HANDLERS ---
+  // Action Handlers
   const requestDelete = (e, id) => {
     e.stopPropagation();
     setDeleteTargetId(id);
@@ -447,7 +447,6 @@ export const CandidatePipeline = () => {
           </div>
         </div>
       )}
-
     </Layout>
   );
 };
