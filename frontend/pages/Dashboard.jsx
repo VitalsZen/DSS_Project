@@ -15,13 +15,13 @@ export const Dashboard = () => {
 
   const appList = applications || [];
 
-  // --- 1. Metrics Calculation ---
+  // Metrics Calculation 
   const totalApplications = appList.length;
   const totalAnalyses = appList.length; 
   const savedJdsCount = jds.length;
   const perfectMatchesCount = appList.filter(app => app.matchScore >= 90).length;
 
-  // --- 2. Chart Data Logic ---
+  // Chart Data Logic
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
@@ -131,7 +131,7 @@ export const Dashboard = () => {
                 allowDecimals={false} 
               />
               
-              {/* [FIX] Việt hóa Tooltip */}
+              {/* Việt hóa Tooltip */}
               <Tooltip 
                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
                 cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} 
