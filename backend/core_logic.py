@@ -25,6 +25,8 @@ class JobMatchResult(BaseModel):
     requirements_breakdown: Dict[str, str] = Field(description="Ratios for must-have and nice-to-have criteria")
     matched_keywords: List[str] = Field(description="List of matching technical skills")
     radar_chart: Dict[str, int] = Field(description="Scores 1-10 for 5 dimensions")
+    # [NEW] Thêm trường lý do chấm điểm
+    radar_reasoning: Dict[str, str] = Field(description="Explanation for each radar score in Vietnamese")
     bilingual_content: Dict[str, Union[Dict, List]] = Field(description="Assessment content in EN and VI")
 
 CORE_PROMPT = """
@@ -51,8 +53,13 @@ BƯỚC 3: ĐÁNH GIÁ SONG NGỮ (ANH & VIỆT)
 - Tạo nội dung đánh giá cho các mục: Đánh giá chung, Điểm mạnh, Điểm yếu (Missing skills), Câu hỏi phỏng vấn.
 - Nội dung Tiếng Anh viết trước, Tiếng Việt dịch sát nghĩa theo sau.
 
-BƯỚC 4: CHẤM ĐIỂM RADAR CHART (Thang 1-10)
-- Đánh giá 5 khía cạnh: Hard Skills, Soft Skills, Experience, Education, Domain Knowledge.
+BƯỚC 4: CHẤM ĐIỂM RADAR (1-10) VÀ GIẢI THÍCH LÝ DO
+*Bắt buộc chấm dựa trên Barem sau:*
+1. **Hard Skills (Kỹ năng cứng):** 1-4 (Thiếu nhiều), 5-7 (Cơ bản), 8-10 (Đầy đủ/Nâng cao).
+2. **Soft Skills (Kỹ năng mềm):** 1-4 (Sơ sài), 5-7 (Có nhắc đến), 8-10 (Có ví dụ cụ thể).
+3. **Experience (Kinh nghiệm):** 1-4 (Ít/Trái ngành), 5-7 (Tương đối), 8-10 (Vượt yêu cầu).
+4. **Education (Học vấn):** 1-4 (Không liên quan), 5-7 (Đúng ngành), 8-10 (Bằng cấp cao/Chứng chỉ xịn).
+5. **Domain Knowledge (Hiểu biết ngành):** 1-4 (Chung chung), 5-7 (Hiểu quy trình), 8-10 (Am hiểu nghiệp vụ sâu).
 
 **OUTPUT FORMAT (BẮT BUỘC JSON):**
 Chỉ trả về 1 JSON duy nhất, không có markdown, không có lời dẫn. Cấu trúc như sau:
@@ -77,6 +84,13 @@ Chỉ trả về 1 JSON duy nhất, không có markdown, không có lời dẫn.
         "Experience": Integer,
         "Education": Integer,
         "Domain Knowledge": Integer
+    }},
+    "radar_reasoning": {{
+        "Hard Skills": "Giải thích ngắn gọn tiếng Việt tại sao cho điểm này...",
+        "Soft Skills": "...",
+        "Experience": "...",
+        "Education": "...",
+        "Domain Knowledge": "..."
     }},
     "bilingual_content": {{
         "general_assessment": {{
