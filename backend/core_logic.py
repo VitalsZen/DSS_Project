@@ -62,7 +62,12 @@ BƯỚC 4: CHẤM ĐIỂM RADAR (1-10) VÀ GIẢI THÍCH LÝ DO
 5. **Domain Knowledge (Hiểu biết ngành):** 1-4 (Chung chung), 5-7 (Hiểu quy trình), 8-10 (Am hiểu nghiệp vụ sâu).
 
 **OUTPUT FORMAT (BẮT BUỘC JSON):**
-Chỉ trả về 1 JSON duy nhất, không có markdown, không có lời dẫn. Cấu trúc như sau:
+Chỉ trả về 1 JSON duy nhất.
+LƯU Ý QUAN TRỌNG:
+1. Không dùng Markdown (```json ... ```). Trả về raw text.
+2. KHÔNG ĐƯỢC có dấu phẩy (,) ở cuối danh sách hoặc object cuối cùng. (NO TRAILING COMMAS).
+3. Đảm bảo cấu trúc ngoặc {} đóng mở chính xác.
+Cấu trúc như sau:
 {{
     "personal_info": {{
         "name": "String",
