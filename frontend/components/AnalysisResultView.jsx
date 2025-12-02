@@ -13,29 +13,32 @@ const RADAR_LABELS = {
 
 // Hàm custom để render label Radar có ngắt dòng
 const renderPolarAngleAxis = ({ payload, x, y, cx, cy, ...rest }) => {
-    const words = payload.value.split(' ');
-    // Logic ngắt dòng đơn giản: Nếu > 2 từ thì cắt đôi
+    // Chỉ xử lý nếu payload.value là chuỗi
+    const text = typeof payload.value === 'string' ? payload.value : String(payload.value);
+    
+    const words = text.split(' ');
     let lines = [];
+    // Logic ngắt dòng: Nếu > 2 từ thì cắt đôi
     if (words.length > 2) {
         const mid = Math.ceil(words.length / 2);
         lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
     } else {
-        lines = [payload.value];
+        lines = [text];
     }
 
     return (
       <Text
         {...rest}
         verticalAnchor="middle"
-        y={y + (y - cy) / 10} // Đẩy chữ ra xa tâm một chút
-        x={x + (x - cx) / 10}
+        y={y + (y - cy) / 8} // Tăng khoảng cách một chút cho thoáng
+        x={x + (x - cx) / 8}
         textAnchor="middle"
         fill="#64748b"
-        fontSize={11} // Tăng size chữ một chút (từ 10 lên 11)
+        fontSize={11} 
         fontWeight={600}
       >
         {lines.map((line, i) => (
-            <tspan key={i} x={x + (x - cx) / 10} dy={i === 0 ? 0 : 12}>
+            <tspan key={i} x={x + (x - cx) / 8} dy={i === 0 ? 0 : 12}>
                 {line}
             </tspan>
         ))}
