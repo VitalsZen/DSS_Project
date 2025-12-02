@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Text } from "recharts";
 import { Icon } from "./Icon";
 import { useApplicationContext } from "../context/ApplicationContext";
 
@@ -11,9 +11,41 @@ const RADAR_LABELS = {
     "Domain Knowledge": "Kiến thức ngành"
 };
 
+// Hàm custom để render label Radar có ngắt dòng
+const renderPolarAngleAxis = ({ payload, x, y, cx, cy, ...rest }) => {
+    const words = payload.value.split(' ');
+    // Logic ngắt dòng đơn giản: Nếu > 2 từ thì cắt đôi
+    let lines = [];
+    if (words.length > 2) {
+        const mid = Math.ceil(words.length / 2);
+        lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+    } else {
+        lines = [payload.value];
+    }
+
+    return (
+      <Text
+        {...rest}
+        verticalAnchor="middle"
+        y={y + (y - cy) / 10} // Đẩy chữ ra xa tâm một chút
+        x={x + (x - cx) / 10}
+        textAnchor="middle"
+        fill="#64748b"
+        fontSize={11} // Tăng size chữ một chút (từ 10 lên 11)
+        fontWeight={600}
+      >
+        {lines.map((line, i) => (
+            <tspan key={i} x={x + (x - cx) / 10} dy={i === 0 ? 0 : 12}>
+                {line}
+            </tspan>
+        ))}
+      </Text>
+    );
+};
+
 export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
   const { language, t } = useApplicationContext();
-  const [showReasoning, setShowReasoning] = useState(false); // State bật tắt Drawer
+  const [showReasoning, setShowReasoning] = useState(false);
 
   if (!data) return null;
 
@@ -54,7 +86,6 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       
-      {/* Header Info */}
       {(customTitle || customSubtitle) && (
         <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
              <div>
@@ -66,7 +97,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* CỘT TRÁI: ĐIỂM SỐ CHUNG */}
+          {/* CỘT TRÁI: ĐIỂM SỐ */}
           <div className="lg:col-span-5 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col items-center justify-center">
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-wide">{t('result.overall_score')}</h3>
                 <div className="relative size-48 mb-8">
@@ -82,7 +113,6 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                         <span className="text-sm font-medium text-slate-400">{t('result.confidence')}</span>
                     </div>
                 </div>
-                {/* Stats Breakdown */}
                 <div className="flex w-full gap-4">
                     <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 flex flex-col items-center border border-slate-100 dark:border-slate-800">
                         <span className="text-2xl font-bold text-text-light dark:text-text-dark">{data.requirements_breakdown.must_have_ratio}</span>
@@ -95,14 +125,12 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                 </div>
           </div>
 
-          {/* CỘT PHẢI: RADAR CHART (CONTAINER CHÍNH) */}
-          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[400px]">
+          {/* CỘT PHẢI: RADAR CHART */}
+          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[450px]">
               
-              {/* Header của Card */}
               <div className="p-6 pb-2 flex justify-between items-center z-10">
                   <h3 className="text-base font-bold text-text-light dark:text-text-dark">{t('result.radar_chart')}</h3>
                   
-                  {/* NÚT BẬT/TẮT DRAWER */}
                   <button 
                     onClick={() => setShowReasoning(!showReasoning)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
@@ -112,33 +140,39 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                     }`}
                   >
                     {showReasoning ? (
-                        <>Close Details <Icon name="close" className="text-sm" /></>
+                        <>{t('result.btn_close_details')} <Icon name="close" className="text-sm" /></>
                     ) : (
-                        <>Why this score? <Icon name="info" className="text-sm" /></>
+                        <>{t('result.btn_why_score')} <Icon name="info" className="text-sm" /></>
                     )}
                   </button>
               </div>
 
-              {/* CHART AREA (Tự động co giãn khi Drawer mở) */}
+              {/* CHART AREA */}
               <div className={`flex-1 w-full transition-all duration-300 ease-in-out ${showReasoning ? 'pr-[320px]' : ''}`}>
                   <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius={showReasoning ? "55%" : "70%"} data={radarData}>
+                      <RadarChart cx="50%" cy="50%" outerRadius={showReasoning ? "55%" : "65%"} data={radarData}>
                           <PolarGrid stroke="#e2e8f0" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} />
+                          <PolarAngleAxis 
+                            dataKey="subject" 
+                            tick={renderPolarAngleAxis} // Sử dụng hàm render custom
+                          />
                           <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
                           <Radar name="Score" dataKey="score" stroke="#137fec" strokeWidth={3} fill="#137fec" fillOpacity={0.2} />
                       </RadarChart>
                   </ResponsiveContainer>
               </div>
 
-              {/* SLIDE-IN DRAWER (Nằm bên phải, đè lên chart hoặc đẩy chart) */}
+              {/* SLIDE-IN DRAWER */}
               <div 
-                className={`absolute top-0 right-0 h-full w-[300px] bg-slate-50 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col ${
+                className={`absolute top-0 right-0 h-full w-[320px] bg-slate-50 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col ${
                     showReasoning ? 'translate-x-0 shadow-xl' : 'translate-x-full'
                 }`}
               >
-                  <div className="p-4 border-b border-border-light dark:border-border-dark font-bold text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/50">
-                      Detailed Scoring Reasoning
+                  <div className="p-4 border-b border-border-light dark:border-border-dark font-bold text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/50 flex justify-between items-center">
+                      <span>{t('result.drawer_title')}</span>
+                      <button onClick={() => setShowReasoning(false)} className="text-slate-400 hover:text-slate-600">
+                          <Icon name="close" />
+                      </button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                       {radarData.map((item, index) => (
@@ -159,7 +193,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
 
           </div>
       </div>
-      
+
       <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
             <div className="p-6 pb-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2 mb-4">
@@ -173,9 +207,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                   ))}
               </div>
             </div>
-
             <div className="h-px w-full bg-slate-100 dark:bg-slate-800"></div>
-
             <div className="p-6 pt-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2 mb-3">
                   <Icon name="psychology" className="text-lg" /> {t('result.ai_assessment')}
@@ -208,13 +240,9 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                               <td className="px-6 py-4 text-slate-600 dark:text-slate-400 align-top leading-relaxed">{row.cv_evidence}</td>
                               <td className="px-6 py-4 align-top text-center">
                                   {row.status === 'Matched' ? (
-                                      <div className="size-8 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mx-auto text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900/50">
-                                            <Icon name="check" className="text-lg font-bold" />
-                                      </div>
+                                      <div className="size-8 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mx-auto text-green-600 dark:text-green-400 border border-green-100 dark:border-green-900/50"><Icon name="check" className="text-lg font-bold" /></div>
                                   ) : (
-                                      <div className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400 border border-slate-200 dark:border-slate-700">
-                                            <Icon name="close" className="text-lg font-bold" />
-                                      </div>
+                                      <div className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400 border border-slate-200 dark:border-slate-700"><Icon name="close" className="text-lg font-bold" /></div>
                                   )}
                               </td>
                           </tr>
@@ -227,36 +255,25 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm">
               <h4 className="text-lg font-bold text-green-700 dark:text-green-400 mb-5 flex items-center gap-2">
-                  <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                      <Icon name="thumb_up" className="text-xl" />
-                  </div>
-                  {t('result.strengths')}
+                  <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg"><Icon name="thumb_up" className="text-xl" /></div>{t('result.strengths')}
               </h4>
               <ul className="space-y-4">
                   {(data.bilingual_content.strengths[language] || data.bilingual_content.strengths['en']).map((item, i) => (
                       <li key={i} className="flex items-start gap-3 p-3 bg-green-50/50 dark:bg-green-900/10 rounded-lg">
-                          <div className="mt-0.5 text-green-600 dark:text-green-400">
-                              <Icon name="check_circle" className="text-xl" fill />
-                          </div>
+                          <div className="mt-0.5 text-green-600 dark:text-green-400"><Icon name="check_circle" className="text-xl" fill /></div>
                           <span className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{item}</span>
                       </li>
                   ))}
               </ul>
           </div>
-
           <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm">
               <h4 className="text-lg font-bold text-orange-600 dark:text-orange-400 mb-5 flex items-center gap-2">
-                  <div className="p-1.5 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                      <Icon name="warning" className="text-xl" />
-                  </div>
-                  {t('result.weaknesses')}
+                  <div className="p-1.5 bg-orange-100 dark:bg-orange-900/30 rounded-lg"><Icon name="warning" className="text-xl" /></div>{t('result.weaknesses')}
               </h4>
               <ul className="space-y-4">
                   {(data.bilingual_content.weaknesses_missing_skills[language] || data.bilingual_content.weaknesses_missing_skills['en']).map((item, i) => (
                       <li key={i} className="flex items-start gap-3 p-3 bg-orange-50/50 dark:bg-orange-900/10 rounded-lg">
-                          <div className="mt-0.5 text-orange-500 dark:text-orange-400">
-                              <Icon name="remove_circle" className="text-xl" fill />
-                          </div>
+                          <div className="mt-0.5 text-orange-500 dark:text-orange-400"><Icon name="remove_circle" className="text-xl" fill /></div>
                           <span className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{item}</span>
                       </li>
                   ))}
@@ -271,12 +288,8 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
           <div className="grid grid-cols-1 gap-4">
               {(data.bilingual_content.interview_questions[language] || data.bilingual_content.interview_questions['en']).map((question, index) => (
                   <div key={index} className="flex gap-4 p-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-card-dark transition-colors">
-                      <span className="flex items-center justify-center size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold shrink-0 shadow-inner">
-                          {index + 1}
-                      </span>
-                      <p className="pt-1 text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
-                          {question}
-                      </p>
+                      <span className="flex items-center justify-center size-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold shrink-0 shadow-inner">{index + 1}</span>
+                      <p className="pt-1 text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{question}</p>
                   </div>
               ))}
           </div>
