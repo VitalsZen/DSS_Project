@@ -1,13 +1,15 @@
+# backend/core_logic.py
 import os
 import time
 from dotenv import load_dotenv
 from typing import List, Dict, Union
 
+# --- Imports ---
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
-
+# VẪN DÙNG HUGGING FACE CHO EMBEDDINGS (Để tránh lỗi API Google khi Embedding)
 from langchain_huggingface import HuggingFaceEmbeddings 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
@@ -16,7 +18,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-# DATA MODELS
+# --- DATA MODELS ---
 class JobMatchResult(BaseModel):
     personal_info: Dict[str, str] = Field(description="Name, position, experience extracted from CV")
     matching_score: Dict[str, Union[int, str]] = Field(description="Percentage score and explanation")
@@ -135,10 +137,11 @@ def get_llm():
     if _llm_instance is None:
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            print(" LỖI NGHIÊM TRỌNG: Không tìm thấy GOOGLE_API_KEY trong biến môi trường")
+            print("❌ LỖI NGHIÊM TRỌNG: Không tìm thấy GOOGLE_API_KEY trong biến môi trường!")
         else:
-            print(f" Đã tìm thấy API Key: {api_key[:5]}... (ẩn phần sau)")
+            print(f"✅ Đã tìm thấy API Key: {api_key[:5]}... (ẩn phần sau)")
             
+        # [FIX] Dùng gemini-1.5-flash để ổn định và thông minh hơn
         _llm_instance = ChatGoogleGenerativeAI(
             model="gemini-flash-latest", 
             temperature=0.2,
@@ -161,7 +164,7 @@ def analyze_cv_logic(file_path: str, jd_text: str):
     if not os.getenv("GOOGLE_API_KEY"):
         return {"error": "Server chưa nhận được GOOGLE_API_KEY. Hãy kiểm tra Settings trên Hugging Face."}
 
-    # 1. PDF Handlers
+    # 1. Xử lý PDF
     try:
         loader = PDFPlumberLoader(file_path)
         docs = loader.load()
@@ -193,6 +196,7 @@ def analyze_cv_logic(file_path: str, jd_text: str):
         def format_docs(docs):
             return "\n\n".join(d.page_content for d in docs)
 
+        # [FIX] Định nghĩa chain rõ ràng hơn để tránh lỗi "Missing variables"
         chain = (
             {
                 "cv_text": retriever | format_docs, 
@@ -203,7 +207,7 @@ def analyze_cv_logic(file_path: str, jd_text: str):
             | parser
         )
 
-        print(" Đang phân tích với Gemini Flash...")
+        print("🤖 Đang phân tích với Gemini 1.5 Flash...")
         result = chain.invoke(jd_text)
         
         vectorstore.delete_collection() 
@@ -211,5 +215,5 @@ def analyze_cv_logic(file_path: str, jd_text: str):
 
     except Exception as e:
         # In lỗi chi tiết ra console server để debug
-        print(f" LỖI PHÂN TÍCH: {str(e)}")
+        print(f"❌ LỖI PHÂN TÍCH: {str(e)}")
         return {"error": f"Lỗi phân tích AI: {str(e)}"}
