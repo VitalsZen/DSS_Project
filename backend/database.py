@@ -1,21 +1,19 @@
-# backend/database.py
 import os
 from sqlmodel import SQLModel, create_engine, Session
 
-# 1. Lấy biến môi trường DATABASE_URL (Do Render cung cấp)
+# Lấy biến môi trường DATABASE_URL 
 # Nếu không có (đang chạy local), thì dùng file database.db
 database_url = os.getenv("DATABASE_URL")
 
 if database_url:
-    # --- CẤU HÌNH CHO RENDER (POSTGRESQL) ---
-    # Fix lỗi thư viện cũ: đổi postgres:// thành postgresql://
+    #  CẤU HÌNH CHO RENDER (POSTGRESQL)
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
     # Kết nối Postgres
     engine = create_engine(database_url, echo=False)
 else:
-    # --- CẤU HÌNH CHO LOCAL (SQLITE) ---
+    # SQLITE - LOCAL TESTING
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     sqlite_file_name = os.path.join(BASE_DIR, "database.db")
     sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -23,7 +21,6 @@ else:
     engine = create_engine(sqlite_url, connect_args=connect_args)
 
 def create_db_and_tables():
-    # Tạo bảng nếu chưa có
     SQLModel.metadata.create_all(engine)
 
 def get_session():
