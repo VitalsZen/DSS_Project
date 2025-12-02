@@ -24,13 +24,26 @@ export const JdProvider = ({ children }) => {
     fetchJds();
   }, []);
 
+const formatVNTime = (dateString) => {
+      if (!dateString) return '-';
+      let utcString = dateString;
+      if (!utcString.endsWith('Z')) utcString += 'Z';
+      try {
+          return new Date(utcString).toLocaleString('vi-VN', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit', hour12: false
+          });
+      } catch (e) { return dateString; }
+  };
+
   const mapJd = (item) => ({
     id: item.id?.toString?.() ?? String(item.id),
     title: item.title || 'Untitled',
     company: item.company || '',
     content: item.content || '',
-    createdAt: item.created_at ? new Date(item.created_at).toLocaleDateString('vi-VN') : '-',
-    updatedAt: item.updated_at ? new Date(item.updated_at).toLocaleDateString('vi-VN') : '-'
+    // Áp dụng hàm format mới
+    createdAt: formatVNTime(item.created_at),
+    updatedAt: formatVNTime(item.updated_at)
   });
 
   const fetchJds = async () => {
