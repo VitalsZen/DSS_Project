@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Text } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 import { Icon } from "./Icon";
 import { useApplicationContext } from "../context/ApplicationContext";
 
@@ -11,53 +11,9 @@ const RADAR_LABELS = {
     "Domain Knowledge": "Kiến thức ngành"
 };
 
-// --- HÀM CUSTOM RENDER LABEL (Đã fix lỗi [object Object]) ---
-const renderPolarAngleAxis = ({ payload, x, y, cx, cy, ...rest }) => {
-    // 1. Kiểm tra an toàn: Nếu không có giá trị thì không render
-    if (!payload || !payload.value) return null;
-
-    // 2. Ép kiểu về String để tránh lỗi [object Object]
-    const label = String(payload.value);
-    
-    // 3. Xử lý ngắt dòng (Wrap text)
-    const words = label.split(' ');
-    let lines = [];
-    
-    // Nếu nhãn dài hơn 1 từ và tổng độ dài > 10 ký tự -> Cắt đôi
-    if (words.length > 1 && label.length > 10) {
-        const mid = Math.ceil(words.length / 2);
-        lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
-    } else {
-        lines = [label];
-    }
-
-    // 4. Tính toán vị trí đẩy chữ ra xa tâm một chút để không đè vào biểu đồ
-    const yOffset = y + (y - cy) / 6;
-    const xOffset = x + (x - cx) / 6;
-
-    return (
-      <Text
-        {...rest}
-        verticalAnchor="middle"
-        y={yOffset}
-        x={xOffset}
-        textAnchor="middle"
-        fill="#64748b" // Màu chữ xám đậm (Slate-500)
-        fontSize={11}  // Cỡ chữ vừa phải
-        fontWeight={600}
-      >
-        {lines.map((line, i) => (
-            <tspan key={i} x={xOffset} dy={i === 0 ? 0 : 14}>
-                {line}
-            </tspan>
-        ))}
-      </Text>
-    );
-};
-
 export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
   const { language, t } = useApplicationContext();
-  const [showReasoning, setShowReasoning] = useState(false);
+  const [showReasoning, setShowReasoning] = useState(false); // State bật tắt Drawer
 
   if (!data) return null;
 
@@ -73,7 +29,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
         }
     }
     return {
-        // Đảm bảo subject luôn là String
+        // [FIX] Bỏ logic wrap text, giữ nguyên tên
         subject: language === 'vi' ? (RADAR_LABELS[subject] || subject) : subject,
         score,
         fullMark: 10,
@@ -99,6 +55,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       
+      {/* Header Info */}
       {(customTitle || customSubtitle) && (
         <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
              <div>
@@ -110,7 +67,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* CỘT TRÁI: ĐIỂM SỐ */}
+          {/* CỘT TRÁI: ĐIỂM SỐ CHUNG */}
           <div className="lg:col-span-5 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col items-center justify-center">
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-wide">{t('result.overall_score')}</h3>
                 <div className="relative size-48 mb-8">
@@ -139,12 +96,13 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
           </div>
 
           {/* CỘT PHẢI: RADAR CHART (CONTAINER CHÍNH) */}
-          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[450px]">
+          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[400px]">
               
+              {/* Header của Card */}
               <div className="p-6 pb-2 flex justify-between items-center z-10">
                   <h3 className="text-base font-bold text-text-light dark:text-text-dark">{t('result.radar_chart')}</h3>
                   
-                  {/* Nút bật/tắt Drawer - Đã dùng t() */}
+                  {/* NÚT BẬT/TẮT DRAWER */}
                   <button 
                     onClick={() => setShowReasoning(!showReasoning)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
@@ -161,39 +119,32 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                   </button>
               </div>
 
-              {/* CHART AREA */}
-              <div className={`flex-1 w-full transition-all duration-300 ease-in-out ${showReasoning ? 'pr-[320px]' : ''}`}>
+              {/* CHART AREA (Giữ nguyên kích thước, KHÔNG SCALE) */}
+              <div className="flex-1 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                      {/* Đã giảm outerRadius xuống 60% để không bị che chữ */}
-                      <RadarChart cx="50%" cy="50%" outerRadius={showReasoning ? "50%" : "60%"} data={radarData}>
+                      {/* [FIX] Luôn giữ radius 70%, không co lại */}
+                      <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                           <PolarGrid stroke="#e2e8f0" />
-                          
-                          {/* SỬ DỤNG HÀM RENDER TÙY CHỈNH ĐỂ NGẮT DÒNG */}
-                          <PolarAngleAxis 
-                            dataKey="subject" 
-                            tick={renderPolarAngleAxis} 
-                          />
-                          
+                          <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
                           <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
                           <Radar name="Score" dataKey="score" stroke="#137fec" strokeWidth={3} fill="#137fec" fillOpacity={0.2} />
                       </RadarChart>
                   </ResponsiveContainer>
               </div>
 
-              {/* SLIDE-IN DRAWER (Bảng trượt) */}
+              {/* SLIDE-IN DRAWER (Mở rộng hơn, đè lên chart) */}
               <div 
-                className={`absolute top-0 right-0 h-full w-[320px] bg-slate-50 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col ${
+                className={`absolute top-0 right-0 h-full w-[400px] bg-slate-50/95 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col backdrop-blur-sm ${
                     showReasoning ? 'translate-x-0 shadow-xl' : 'translate-x-full'
                 }`}
               >
-                  <div className="p-4 border-b border-border-light dark:border-border-dark font-bold text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/50 flex justify-between items-center">
+                  <div className="p-4 border-b border-border-light dark:border-border-dark font-bold text-sm text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-slate-900/50 flex justify-between items-center">
                       <span>{t('result.drawer_title')}</span>
-                      {/* Nút đóng Drawer */}
-                      <button onClick={() => setShowReasoning(false)} className="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-600">
+                      <button onClick={() => setShowReasoning(false)} className="text-slate-400 hover:text-slate-600">
                           <Icon name="close" />
                       </button>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                  <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
                       {radarData.map((item, index) => (
                           <div key={index}>
                               <div className="flex justify-between items-center mb-1">
@@ -202,7 +153,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                                       {item.score}/10
                                   </span>
                               </div>
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic bg-white dark:bg-slate-900 p-2 rounded border border-slate-100 dark:border-slate-700">
+                              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed italic bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
                                   {item.reason}
                               </p>
                           </div>
@@ -213,7 +164,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
           </div>
       </div>
 
-      {/* ... (Các phần Matched Keywords, AI Assessment, Table... giữ nguyên) ... */}
+      {/* ... (Các phần dưới giữ nguyên) ... */}
       <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
             <div className="p-6 pb-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2 mb-4">
