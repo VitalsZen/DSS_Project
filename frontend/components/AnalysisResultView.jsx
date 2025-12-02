@@ -17,7 +17,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
 
   if (!data) return null;
 
-  // Xử lý dữ liệu
+  // Radar handlers
   const radarData = Object.entries(data.radar_chart).map(([subject, score]) => {
     let reasonText = "No explanation provided.";
     if (data.radar_reasoning && data.radar_reasoning[subject]) {
@@ -29,7 +29,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
         }
     }
     return {
-        // [FIX] Bỏ logic wrap text, giữ nguyên tên
+        // Return radar attribute
         subject: language === 'vi' ? (RADAR_LABELS[subject] || subject) : subject,
         score,
         fullMark: 10,
@@ -67,7 +67,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* CỘT TRÁI: ĐIỂM SỐ CHUNG */}
+          {/* MATCHSCORE */}
           <div className="lg:col-span-5 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col items-center justify-center">
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-wide">{t('result.overall_score')}</h3>
                 <div className="relative size-48 mb-8">
@@ -95,14 +95,14 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                 </div>
           </div>
 
-          {/* CỘT PHẢI: RADAR CHART (CONTAINER CHÍNH) */}
+          {/* RADAR CHART */}
           <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[400px]">
               
-              {/* Header của Card */}
+              {/* Header */}
               <div className="p-6 pb-2 flex justify-between items-center z-10">
                   <h3 className="text-base font-bold text-text-light dark:text-text-dark">{t('result.radar_chart')}</h3>
                   
-                  {/* NÚT BẬT/TẮT DRAWER */}
+                  {/* DRAWER TOGGLE */}
                   <button 
                     onClick={() => setShowReasoning(!showReasoning)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
@@ -119,7 +119,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                   </button>
               </div>
 
-              {/* CHART AREA (Giữ nguyên kích thước, KHÔNG SCALE) */}
+              {/* CHART AREA */}
               <div className="flex-1 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                       {/* [FIX] Luôn giữ radius 70%, không co lại */}
@@ -132,7 +132,7 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
                   </ResponsiveContainer>
               </div>
 
-              {/* SLIDE-IN DRAWER (Mở rộng hơn, đè lên chart) */}
+              {/* SLIDE-IN DRAWER */}
               <div 
                 className={`absolute top-0 right-0 h-full w-[400px] bg-slate-50/95 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col backdrop-blur-sm ${
                     showReasoning ? 'translate-x-0 shadow-xl' : 'translate-x-full'
@@ -164,7 +164,6 @@ export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
           </div>
       </div>
 
-      {/* ... (Các phần dưới giữ nguyên) ... */}
       <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
             <div className="p-6 pb-4">
               <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide flex items-center gap-2 mb-4">
