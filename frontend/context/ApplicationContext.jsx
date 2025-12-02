@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// --- TỪ ĐIỂN ĐA NGÔN NGỮ (CẢI TIẾN) ---
+// TỪ ĐIỂN
 const TRANSLATIONS = {
   en: {
     // Sidebar
