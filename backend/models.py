@@ -1,4 +1,3 @@
-# backend/models.py
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 import uuid
@@ -6,14 +5,13 @@ from sqlmodel import Field, SQLModel, Relationship
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSONB  # Dùng cái này mới là chuẩn DBA cho Postgres
 
-# 1. Bảng User: Quản lý danh tính (Gốc rễ của dữ liệu)
+# Bảng User
 class User(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     is_guest: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.now)
     
     # Quan hệ: Một User có nhiều App và JD
-    # sa_relationship_kwargs={"cascade": "all, delete"} -> Xóa User là xóa sạch dữ liệu con
     applications: List["Application"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete"})
     jds: List["JobDescription"] = Relationship(back_populates="user", sa_relationship_kwargs={"cascade": "all, delete"})
 
@@ -37,7 +35,7 @@ class JobDescriptionUpdate(SQLModel):
     company: Optional[str] = None
     content: Optional[str] = None
 
-# 3. Bảng Application: Kết quả phân tích (Core Data)
+# 3. Bảng Application
 class Application(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: uuid.UUID = Field(foreign_key="user.id", index=True)
@@ -48,9 +46,7 @@ class Application(SQLModel, table=True):
     match_score: int = Field(default=0)
     jd_content: Optional[str] = Field(default=None)
     
-    # [DBA CHOICE] Dùng JSONB để lưu kết quả AI. 
-    # Lợi ích: Query nhanh hơn text, index được từng key bên trong.
-    # default={} để tránh lỗi null.
+    # Dùng JSONB để lưu kết quả AI -> Query nhanh hơn text, index được từng key bên trong.
     analysis_result: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
     
     created_at: datetime = Field(default_factory=datetime.now)
