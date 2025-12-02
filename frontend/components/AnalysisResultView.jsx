@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 import { Icon } from "./Icon";
 import { useApplicationContext } from "../context/ApplicationContext";
 
-// --- TỪ ĐIỂN DỊCH TRỤC BIỂU ĐỒ ---
 const RADAR_LABELS = {
     "Hard Skills": "Kỹ năng cứng",
     "Soft Skills": "Kỹ năng mềm",
@@ -12,34 +11,24 @@ const RADAR_LABELS = {
     "Domain Knowledge": "Kiến thức ngành"
 };
 
-export const AnalysisResultView = ({ 
-  customTitle, 
-  customSubtitle, 
-  data 
-}) => {
+export const AnalysisResultView = ({ customTitle, customSubtitle, data }) => {
   const { language, t } = useApplicationContext();
+  const [showReasoning, setShowReasoning] = useState(false); // State bật tắt Drawer
 
   if (!data) return null;
 
-  // Xử lý dữ liệu: Ghép điểm số và lý do vào một mảng
+  // Xử lý dữ liệu
   const radarData = Object.entries(data.radar_chart).map(([subject, score]) => {
-    // Lấy lý do: Kiểm tra xem radar_reasoning có tồn tại và có đúng format đa ngôn ngữ không
     let reasonText = "No explanation provided.";
     if (data.radar_reasoning && data.radar_reasoning[subject]) {
         const reasonObj = data.radar_reasoning[subject];
-        // Nếu là object có en/vi (Format mới)
         if (typeof reasonObj === 'object') {
             reasonText = reasonObj[language] || reasonObj['en'] || "";
-        } 
-        // Nếu là string (Format cũ - tương thích ngược)
-        else if (typeof reasonObj === 'string') {
+        } else if (typeof reasonObj === 'string') {
             reasonText = reasonObj;
         }
     }
-
     return {
-        originalSubject: subject,
-        // Dịch tên trục
         subject: language === 'vi' ? (RADAR_LABELS[subject] || subject) : subject,
         score,
         fullMark: 10,
@@ -52,23 +41,20 @@ export const AnalysisResultView = ({
     { name: 'Unmatched', value: 100 - data.matching_score.percentage, color: '#f1f5f9' }
   ];
 
-  const getComparisonTable = () => {
-    const table = data.bilingual_content.comparison_table;
-    if (Array.isArray(table)) { return table; }
-    return table[language] || table['en'] || [];
-  };
-
-  const comparisonTable = getComparisonTable();
-
-  // Helper chọn màu cho điểm số
   const getScoreColor = (score) => {
       if (score >= 8) return "bg-green-100 text-green-700 border-green-200";
       if (score >= 5) return "bg-yellow-50 text-yellow-700 border-yellow-200";
       return "bg-red-50 text-red-700 border-red-200";
   };
 
+  const comparisonTable = Array.isArray(data.bilingual_content.comparison_table) 
+    ? data.bilingual_content.comparison_table 
+    : (data.bilingual_content.comparison_table[language] || []);
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      
+      {/* Header Info */}
       {(customTitle || customSubtitle) && (
         <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
              <div>
@@ -79,38 +65,24 @@ export const AnalysisResultView = ({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT: OVERALL SCORE */}
+          
+          {/* CỘT TRÁI: ĐIỂM SỐ CHUNG */}
           <div className="lg:col-span-5 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col items-center justify-center">
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6 uppercase tracking-wide">{t('result.overall_score')}</h3>
-                
                 <div className="relative size-48 mb-8">
                     <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie
-                            data={scoreData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={70}
-                            outerRadius={85}
-                            startAngle={90}
-                            endAngle={-270}
-                            dataKey="value"
-                            stroke="none"
-                            cornerRadius={10}
-                            paddingAngle={5}
-                        >
-                            {scoreData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                        </Pie>
-                    </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-black text-text-light dark:text-text-dark tracking-tighter">{data.matching_score.percentage}%</span>
-                    <span className="text-sm font-medium text-slate-400">{t('result.confidence')}</span>
+                        <PieChart>
+                            <Pie data={scoreData} cx="50%" cy="50%" innerRadius={70} outerRadius={85} startAngle={90} endAngle={-270} dataKey="value" stroke="none" cornerRadius={10} paddingAngle={5}>
+                                {scoreData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-5xl font-black text-text-light dark:text-text-dark tracking-tighter">{data.matching_score.percentage}%</span>
+                        <span className="text-sm font-medium text-slate-400">{t('result.confidence')}</span>
+                    </div>
                 </div>
-                </div>
-
+                {/* Stats Breakdown */}
                 <div className="flex w-full gap-4">
                     <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 flex flex-col items-center border border-slate-100 dark:border-slate-800">
                         <span className="text-2xl font-bold text-text-light dark:text-text-dark">{data.requirements_breakdown.must_have_ratio}</span>
@@ -123,56 +95,68 @@ export const AnalysisResultView = ({
                 </div>
           </div>
 
-          {/* RIGHT: RADAR CHART & EXPLANATION */}
-          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col h-full min-h-[400px]">
-              <h3 className="text-base font-bold text-text-light dark:text-text-dark mb-4">{t('result.radar_chart')}</h3>
+          {/* CỘT PHẢI: RADAR CHART (CONTAINER CHÍNH) */}
+          <div className="lg:col-span-7 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm relative overflow-hidden flex flex-col min-h-[400px]">
               
-              <div className="flex flex-col md:flex-row gap-6 h-full">
-                  {/* Chart */}
-                  <div className="h-[300px] md:h-auto w-full md:w-1/2 relative flex-shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                          <RadarChart 
-                            cx="50%" 
-                            cy="50%" 
-                            outerRadius="60%" // [FIX] Giảm radius để chữ không bị cắt
-                            data={radarData}
-                            margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // [FIX] Thêm margin để chừa chỗ cho chữ
-                          >
-                              <PolarGrid stroke="#e2e8f0" />
-                              <PolarAngleAxis 
-                                dataKey="subject" 
-                                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} // [FIX] Giảm font size
-                              />
-                              <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
-                              <Radar
-                                  name="Score"
-                                  dataKey="score"
-                                  stroke="#137fec"
-                                  strokeWidth={3}
-                                  fill="#137fec"
-                                  fillOpacity={0.2}
-                              />
-                          </RadarChart>
-                      </ResponsiveContainer>
-                  </div>
+              {/* Header của Card */}
+              <div className="p-6 pb-2 flex justify-between items-center z-10">
+                  <h3 className="text-base font-bold text-text-light dark:text-text-dark">{t('result.radar_chart')}</h3>
+                  
+                  {/* NÚT BẬT/TẮT DRAWER */}
+                  <button 
+                    onClick={() => setShowReasoning(!showReasoning)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                        showReasoning 
+                        ? 'bg-primary text-white border-primary shadow-md' 
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {showReasoning ? (
+                        <>Close Details <Icon name="close" className="text-sm" /></>
+                    ) : (
+                        <>Why this score? <Icon name="info" className="text-sm" /></>
+                    )}
+                  </button>
+              </div>
 
-                  {/* List Explanations */}
-                  <div className="flex-1 overflow-y-auto max-h-[350px] pr-2 space-y-3 custom-scrollbar">
+              {/* CHART AREA (Tự động co giãn khi Drawer mở) */}
+              <div className={`flex-1 w-full transition-all duration-300 ease-in-out ${showReasoning ? 'pr-[320px]' : ''}`}>
+                  <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius={showReasoning ? "55%" : "70%"} data={radarData}>
+                          <PolarGrid stroke="#e2e8f0" />
+                          <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
+                          <Radar name="Score" dataKey="score" stroke="#137fec" strokeWidth={3} fill="#137fec" fillOpacity={0.2} />
+                      </RadarChart>
+                  </ResponsiveContainer>
+              </div>
+
+              {/* SLIDE-IN DRAWER (Nằm bên phải, đè lên chart hoặc đẩy chart) */}
+              <div 
+                className={`absolute top-0 right-0 h-full w-[300px] bg-slate-50 dark:bg-slate-800/95 border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-in-out z-20 flex flex-col ${
+                    showReasoning ? 'translate-x-0 shadow-xl' : 'translate-x-full'
+                }`}
+              >
+                  <div className="p-4 border-b border-border-light dark:border-border-dark font-bold text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/50">
+                      Detailed Scoring Reasoning
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                       {radarData.map((item, index) => (
-                          <div key={index} className={`p-3 rounded-lg border ${getScoreColor(item.score).replace('text-', 'border-').split(' ')[2]} bg-white dark:bg-slate-800/50 shadow-sm transition-all hover:shadow-md`}>
-                              <div className="flex justify-between items-center mb-1.5">
-                                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">{item.subject}</span>
-                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getScoreColor(item.score)}`}>
+                          <div key={index}>
+                              <div className="flex justify-between items-center mb-1">
+                                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{item.subject}</span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getScoreColor(item.score)}`}>
                                       {item.score}/10
                                   </span>
                               </div>
-                              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed italic border-t border-slate-100 dark:border-slate-700 pt-1.5 mt-1">
-                                  "{item.reason}"
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic bg-white dark:bg-slate-900 p-2 rounded border border-slate-100 dark:border-slate-700">
+                                  {item.reason}
                               </p>
                           </div>
                       ))}
                   </div>
               </div>
+
           </div>
       </div>
       
