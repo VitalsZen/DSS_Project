@@ -299,19 +299,41 @@ export const ApplicationProvider = ({ children }) => {
     return (TRANSLATIONS[language] && TRANSLATIONS[language][key]) || key;
   };
 
-  const mapApp = (item) => ({
-    id: item.id?.toString?.() ?? String(item.id),
-    companyName: item.company_name || item.companyName || '',
-    jobTitle: item.job_title || item.jobTitle || '',
-    status: item.status || 'new',
-    matchScore: item.match_score ?? item.matchScore ?? 0,
-    dateApplied: item.created_at 
-      ? new Date(item.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-      : (item.dateApplied || 'N/A'),
-    analysisResult: item.analysis_result || item.analysisResult || null,
-    jdContent: item.jd_content || '', 
-    logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.company_name || item.companyName || '')}&background=random`
-  });
+  const mapApp = (item) => {
+    let formattedDate = 'N/A';
+    if (item.created_at) {
+        let utcString = item.created_at;
+        // Nếu chuỗi chưa có chữ Z ở cuối, ta thêm vào
+        if (!utcString.endsWith('Z')) {
+            utcString += 'Z';
+        }
+        try {
+            formattedDate = new Date(utcString).toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // Dùng định dạng 24h
+            });
+        } catch (e) {
+            formattedDate = item.created_at;
+        }
+    }
+
+    return {
+      id: item.id?.toString?.() ?? String(item.id),
+      companyName: item.company_name || item.companyName || '',
+      jobTitle: item.job_title || item.jobTitle || '',
+      status: item.status || 'new',
+      matchScore: item.match_score ?? item.matchScore ?? 0,
+      // Dùng biến đã format ở trên
+      dateApplied: formattedDate,
+      analysisResult: item.analysis_result || item.analysisResult || null,
+      jdContent: item.jd_content || '', 
+      logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.company_name || item.companyName || '')}&background=random`
+    };
+  };
 
   const fetchApplications = async () => {
     try {
