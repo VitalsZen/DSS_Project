@@ -1,3 +1,4 @@
+# backend/core_logic.py
 import os
 import time
 import json
@@ -6,14 +7,11 @@ from dotenv import load_dotenv
 from typing import List, Dict, Union
 
 # --- Imports ---
-# Dùng pdfplumber trực tiếp để kiểm soát tốt hơn việc đọc file
 import pdfplumber 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import ChatGoogleGenerativeAI
-# Import Safety Settings để tránh Gemini chặn CV
 from langchain_google_genai import HarmBlockThreshold, HarmCategory
 from langchain_chroma import Chroma
-# VẪN DÙNG HUGGING FACE CHO EMBEDDINGS (Offline CPU)
 from langchain_huggingface import HuggingFaceEmbeddings 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -140,9 +138,8 @@ def get_llm():
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key: print("❌ LỖI: GOOGLE_API_KEY chưa cấu hình!")
         
-        # Cấu hình Safety Settings để không bị chặn khi đọc CV cá nhân
         _llm_instance = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
+            model="gemini-flash-latest", 
             temperature=0.2,
             google_api_key=api_key,
             safety_settings={
@@ -164,12 +161,10 @@ def get_embeddings():
         )
     return _embedding_instance
 
-# --- [QUAN TRỌNG] HÀM VỆ SINH TEXT ĐỂ TRÁNH LỖI LANGCHAIN ---
+# Hàm vệ sinh text (Fix lỗi ngoặc nhọn trong CV code/css)
 def sanitize_text_for_prompt(text):
     if not text: return ""
-    # Thay thế dấu ngoặc nhọn bằng ngoặc tròn để LangChain không hiểu nhầm là biến
-    text = text.replace("{", "(").replace("}", ")")
-    return text
+    return text.replace("{", "(").replace("}", ")")
 
 def clean_json_string(json_str):
     try:
@@ -186,31 +181,25 @@ def analyze_cv_logic(file_path: str, jd_text: str):
     if not os.getenv("GOOGLE_API_KEY"):
         return {"error": "Server Config Error: Missing GOOGLE_API_KEY"}
 
-    # 1. Xử lý PDF (Dùng pdfplumber trực tiếp để robust hơn với file ảnh/layout lạ)
+    # 1. Đọc PDF
     full_text = ""
     try:
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
-                # extract_text() xử lý tốt layout cột
-                page_text = page.extract_text() or "" 
-                full_text += page_text + "\n"
+                full_text += (page.extract_text() or "") + "\n"
         
-        if not full_text.strip():
-            return {"error": "Không thể đọc chữ từ file PDF này (có thể là file ảnh scan)."}
-            
-        # [FIX] Vệ sinh văn bản ngay sau khi đọc
+        if not full_text.strip(): return {"error": "Empty PDF content"}
+        
+        # [FIX] Vệ sinh văn bản
         full_text = sanitize_text_for_prompt(full_text)
         jd_text = sanitize_text_for_prompt(jd_text)
 
-        # Chia nhỏ văn bản
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        # Tạo docs giả lập từ text đã vệ sinh
         docs = text_splitter.create_documents([full_text])
-        
     except Exception as e:
-        return {"error": f"Lỗi đọc file PDF: {str(e)}"}
+        return {"error": f"PDF Error: {str(e)}"}
 
-    # 2. RAG & Gemini
+    # 2. RAG Logic
     try:
         embeddings = get_embeddings()
         llm = get_llm()
@@ -218,20 +207,17 @@ def analyze_cv_logic(file_path: str, jd_text: str):
         vectorstore = Chroma.from_documents(
             documents=docs,
             embedding=embeddings,
-            collection_name=f"cv_analysis_{int(time.time())}",
+            collection_name=f"cv_{int(time.time())}",
         )
         retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
         
+        # [FIX QUAN TRỌNG] Thay đổi phương thức gọi retriever
+        # Trong bản LangChain mới, dùng .invoke() thay vì .get_relevant_documents()
+        relevant_docs = retriever.invoke(jd_text)
+        context_text = "\n\n".join([d.page_content for d in relevant_docs])
+
+        # Gọi LLM trực tiếp (Tránh lỗi Chain missing variables)
         prompt = ChatPromptTemplate.from_template(CORE_PROMPT)
-
-        def format_docs(docs_list):
-            return "\n\n".join(d.page_content for d in docs_list)
-
-        # Retrieve context thủ công để kiểm soát dữ liệu vào
-        relevant_docs = retriever.get_relevant_documents(jd_text)
-        context_text = format_docs(relevant_docs)
-
-        # Gọi LLM trực tiếp (không dùng chain phức tạp để tránh lỗi biến)
         final_prompt_value = prompt.format_messages(
             cv_text=context_text, 
             jd_text=jd_text
@@ -241,16 +227,13 @@ def analyze_cv_logic(file_path: str, jd_text: str):
         response = llm.invoke(final_prompt_value)
         
         # Xử lý kết quả
-        raw_content = response.content
-        print(f"🔍 Raw Output: {raw_content[:50]}...") 
-        
-        cleaned_content = clean_json_string(raw_content)
+        cleaned_content = clean_json_string(response.content)
         
         try:
             result = json.loads(cleaned_content)
         except json.JSONDecodeError as e:
-            print(f"❌ JSON Error: {str(e)}")
-            return {"error": "AI trả về định dạng JSON không hợp lệ. Vui lòng thử lại."}
+            print(f"❌ JSON Error: {cleaned_content[:100]}...")
+            return {"error": "AI returned invalid JSON. Please try again."}
         
         vectorstore.delete_collection() 
         return result
