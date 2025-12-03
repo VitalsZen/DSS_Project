@@ -7,7 +7,7 @@ pinned: false
 app_port: 7860
 ---
 
-## Truy cập Website Deploy:   [**Website**](https://dss-project-iota.vercel.app/#/)
+## Website Deploy:   [**Website**](https://dss-project-iota.vercel.app/#/)
 
 
 
