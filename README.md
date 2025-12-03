@@ -7,6 +7,9 @@ pinned: false
 app_port: 7860
 ---
 
+## 🎥 Video DEMO: [https://www.youtube.com/watch?v=UmhBNERNMZM](https://www.youtube.com/watch?v=UmhBNERNMZM)
+
+
 # CareerFlow – AI-Powered Personal ATS & CV Analyzer
 
 ## 1. Project Title
